@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EpicQrizzz.Quetions.Rest")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2658b70a3a8ac7095aedbe3c1eaa1dc15e742311")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d234eef4c528f79200e85b5c2577db1f9f939476")]
 [assembly: System.Reflection.AssemblyProductAttribute("EpicQrizzz.Quetions.Rest")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EpicQrizzz.Quetions.Rest")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

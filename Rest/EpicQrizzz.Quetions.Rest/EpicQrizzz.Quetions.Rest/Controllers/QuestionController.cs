@@ -8,7 +8,7 @@ namespace MyBackend.Controllers
     [Route("api/[controller]")]
     public class QuetionController : ControllerBase
     {
-        string connectionString = "server=localhost;user id=Joost;password=O%26tw%3A%60%22J%3BLmz7.x*X$!SW%60bbIi%2B%3A%5E7z_;database=EpicQrizzz";
+        string connectionString = "Host=localhost;Port=3306;Database=EpicQrizzz;User=root;Password=;";
 
         [HttpGet("GetAll")]
         public IActionResult GetAll()
@@ -45,6 +45,7 @@ namespace MyBackend.Controllers
             }
             catch
             {
+
                 return NotFound();
 
             }
