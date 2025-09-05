@@ -15,6 +15,7 @@ namespace MyBackend.Controllers
         {
             try
             {
+                Console.WriteLine("checkpoint");
                 var questions = new List<Question>();
 
                 using (var connection = new MySqlConnection(connectionString))
