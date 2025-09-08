@@ -1,8 +1,8 @@
 [
   {
-    "ContainingType": "MyBackend.Controllers.QuestionController",
+    "ContainingType": "MyBackend.Controllers.QuetionController",
     "Method": "CheckAwnser",
-    "RelativePath": "api/Question/CheckAwnser/{id}/{choice}",
+    "RelativePath": "api/Quetion/CheckAwnser/{id}/{choice}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -21,9 +21,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyBackend.Controllers.QuestionController",
+    "ContainingType": "MyBackend.Controllers.QuetionController",
     "Method": "GetAll",
-    "RelativePath": "api/Question/GetAll",
+    "RelativePath": "api/Quetion/GetAll",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -31,9 +31,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyBackend.Controllers.QuestionController",
+    "ContainingType": "MyBackend.Controllers.QuetionController",
     "Method": "GetAwnserById",
-    "RelativePath": "api/Question/GetAwnserById/{id}",
+    "RelativePath": "api/Quetion/GetAwnserById/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -47,9 +47,9 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "MyBackend.Controllers.QuestionController",
+    "ContainingType": "MyBackend.Controllers.QuetionController",
     "Method": "GetById",
-    "RelativePath": "api/Question/GetById/{id}",
+    "RelativePath": "api/Quetion/GetById/{id}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

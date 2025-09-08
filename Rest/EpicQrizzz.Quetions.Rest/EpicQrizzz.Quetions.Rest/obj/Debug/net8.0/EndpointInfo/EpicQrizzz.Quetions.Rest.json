@@ -5,10 +5,10 @@
     "version": "1.0"
   },
   "paths": {
-    "/api/Question/GetAll": {
+    "/api/Quetion/GetAll": {
       "get": {
         "tags": [
-          "Question"
+          "Quetion"
         ],
         "responses": {
           "200": {
@@ -17,10 +17,10 @@
         }
       }
     },
-    "/api/Question/GetById/{id}": {
+    "/api/Quetion/GetById/{id}": {
       "get": {
         "tags": [
-          "Question"
+          "Quetion"
         ],
         "parameters": [
           {
@@ -40,10 +40,10 @@
         }
       }
     },
-    "/api/Question/GetAwnserById/{id}": {
+    "/api/Quetion/GetAwnserById/{id}": {
       "get": {
         "tags": [
-          "Question"
+          "Quetion"
         ],
         "parameters": [
           {
@@ -63,10 +63,10 @@
         }
       }
     },
-    "/api/Question/CheckAwnser/{id}/{choice}": {
+    "/api/Quetion/CheckAwnser/{id}/{choice}": {
       "get": {
         "tags": [
-          "Question"
+          "Quetion"
         ],
         "parameters": [
           {

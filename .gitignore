@@ -1,0 +1,6 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/Rest/EpicQrizzz.Quetions.Rest/.vs/*
+/Rest/EpicQrizzz.Users.Rest/.vs/*
