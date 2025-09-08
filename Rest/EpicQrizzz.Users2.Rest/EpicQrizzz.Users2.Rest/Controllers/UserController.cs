@@ -64,7 +64,6 @@ namespace MyBackend.Controllers
 
                     user.Id = reader["uuid"].ToString();
                     user.Name = reader.GetString("username");
-                    Console.WriteLine(user.Id.Length);
                 }
                 return Ok(user);
             }
@@ -114,7 +113,7 @@ namespace MyBackend.Controllers
         public IActionResult CreateAccount([FromBody] UserCreate user)
         {
             try
-            {
+            {   
                 if (user.Password.Length != 64) return Forbid();
                 using var connection = new MySqlConnection(connectionString);
                 {
