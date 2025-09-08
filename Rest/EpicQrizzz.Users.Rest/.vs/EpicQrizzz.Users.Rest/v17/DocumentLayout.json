@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\lldj0\\Desktop\\school progmeeren\\Projecten\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\",
+  "WorkspaceRootPath": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2F199896-7A8E-40E9-845F-489AC68DA867}|EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest.csproj|c:\\users\\lldj0\\desktop\\school progmeeren\\projecten\\epicqrizzz\\rest\\epicqrizzz.users.rest\\epicqrizzz.users.rest\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{2F199896-7A8E-40E9-845F-489AC68DA867}|EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest.csproj|c:\\users\\edimz\\desktop\\programmeren-en-school\\scool-projects\\fase-3\\epicqrizzz\\rest\\epicqrizzz.users.rest\\epicqrizzz.users.rest\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2F199896-7A8E-40E9-845F-489AC68DA867}|EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest.csproj|solutionrelative:epicqrizzz.users.rest\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -14,15 +14,19 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\lldj0\\Desktop\\school progmeeren\\Projecten\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest\\Program.cs",
               "RelativeDocumentMoniker": "EpicQrizzz.Users.Rest\\Program.cs",
-              "ToolTip": "C:\\Users\\lldj0\\Desktop\\school progmeeren\\Projecten\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest\\Program.cs",
+              "ToolTip": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest\\Program.cs",
               "RelativeToolTip": "EpicQrizzz.Users.Rest\\Program.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
