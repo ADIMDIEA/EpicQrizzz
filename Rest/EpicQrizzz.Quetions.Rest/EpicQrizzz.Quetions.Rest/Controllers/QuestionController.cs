@@ -8,7 +8,7 @@ namespace MyBackend.Controllers
     [Route("api/[controller]")]
     public class QuetionController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=EpicQrizzz;User=lucas;Password=NegerBallen69!";
+        string connectionString = "Server=localhost;Database=EpicQrizzz;User=root;Password=";
 
 
         [HttpGet("GetAll")]
@@ -88,6 +88,43 @@ namespace MyBackend.Controllers
             }
 
         }
+
+        [HttpPost("Add")]
+        public IActionResult Add([FromBody] Question question)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sql = @"INSERT INTO Questions 
+                          (Question, OptionA, OptionB, OptionC, OptionD, CorrectOption) 
+                          VALUES (@Question, @OptionA, @OptionB, @OptionC, @OptionD, @CorrectOption);
+                          SELECT LAST_INSERT_ID();";
+
+                    using var cmd = new MySqlCommand(sql, connection);
+
+                    cmd.Parameters.AddWithValue("@Question", question.QuestionText);
+                    cmd.Parameters.AddWithValue("@OptionA", question.OptionA);
+                    cmd.Parameters.AddWithValue("@OptionB", question.OptionB);
+                    cmd.Parameters.AddWithValue("@OptionC", question.OptionC);
+                    cmd.Parameters.AddWithValue("@OptionD", question.OptionD);
+                    cmd.Parameters.AddWithValue("@CorrectOption", question.CorrectOption); // <-- added
+
+                    // Execute and get new ID
+                    var newId = Convert.ToInt32(cmd.ExecuteScalar());
+                    question.Id = newId;
+                }
+
+                return CreatedAtAction(nameof(GetById), new { id = question.Id }, question);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
 
 
         [HttpGet("GetAwnserById/{id}")]

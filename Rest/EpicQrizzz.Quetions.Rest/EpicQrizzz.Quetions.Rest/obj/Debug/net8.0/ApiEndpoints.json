@@ -1,6 +1,22 @@
 [
   {
     "ContainingType": "MyBackend.Controllers.QuetionController",
+    "Method": "Add",
+    "RelativePath": "api/Quetion/Add",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "question",
+        "Type": "EpicQrizzz.Quetions.Rest.Models.Question",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "MyBackend.Controllers.QuetionController",
     "Method": "CheckAwnser",
     "RelativePath": "api/Quetion/CheckAwnser/{id}/{choice}",
     "HttpMethod": "GET",
