@@ -1,6 +1,0 @@
-@EpicQrizzz.Users2.Rest_HostAddress = http://localhost:5137
-
-GET {{EpicQrizzz.Users2.Rest_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

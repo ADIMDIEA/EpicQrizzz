@@ -1,3 +1,0 @@
-alice=password123
-bob=hunter2
-charlie=letmein

@@ -1,0 +1,6 @@
+@EpicQrizzz.Users.Rest_HostAddress = http://localhost:5096
+
+GET {{EpicQrizzz.Users.Rest_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
