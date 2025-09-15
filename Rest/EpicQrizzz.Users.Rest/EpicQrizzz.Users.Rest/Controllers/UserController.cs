@@ -117,7 +117,7 @@ namespace MyBackend.Controllers
         {
             try
             {   
-                if (user.Password.Length != 64) return Forbid();
+                if (user.Password.Length != 64) return NotFound();
                 using var connection = new MySqlConnection(connectionString);
                 {
                     connection.Open();
