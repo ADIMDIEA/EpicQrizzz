@@ -54,3 +54,16 @@ Controllert of het antwoord van een vraag goed is
 true
 ```
 Dit is een test
+
+### CreateAccount
+http://localhost:8080/api/user/CreateAccount
+
+Dit zorgt ervoor dat je een account kan maken
+
+```json
+{
+  "id": "automatisch gegenereerde uuid",
+  "name": "username",
+  "password": "hashedPassword"
+}
+```
