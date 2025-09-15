@@ -5,6 +5,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Reflection.PortableExecutable;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 namespace MyBackend.Controllers
 {
     [ApiController]
@@ -111,6 +112,7 @@ namespace MyBackend.Controllers
                 return NotFound();
             }
         }
+        [Authorize]
         [HttpPost("CreateAccount")]
         public IActionResult CreateAccount([FromBody] UserCreate user)
         {
