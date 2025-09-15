@@ -9,7 +9,7 @@
     "Parameters": [
       {
         "Name": "question",
-        "Type": "EpicQrizzz.Quetions.Rest.Models.Question",
+        "Type": "EpicQrizzz.Questions.Rest.Models.Question",
         "IsRequired": true
       }
     ],
@@ -17,8 +17,8 @@
   },
   {
     "ContainingType": "MyBackend.Controllers.QuetionController",
-    "Method": "CheckAwnser",
-    "RelativePath": "api/Quetion/CheckAwnser/{id}/{choice}",
+    "Method": "CheckAnswer",
+    "RelativePath": "api/Quetion/CheckAnswer/{id}/{choice}",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -30,7 +30,7 @@
       },
       {
         "Name": "choice",
-        "Type": "System.Char",
+        "Type": "System.String",
         "IsRequired": true
       }
     ],
@@ -44,22 +44,6 @@
     "IsController": true,
     "Order": 0,
     "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "MyBackend.Controllers.QuetionController",
-    "Method": "GetAwnserById",
-    "RelativePath": "api/Quetion/GetAwnserById/{id}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
     "ReturnTypes": []
   },
   {

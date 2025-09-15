@@ -1,14 +1,11 @@
-﻿namespace EpicQrizzz.Quetions.Rest.Models
+﻿namespace EpicQrizzz.Questions.Rest.Models
 {
     public class Question
     {
         public int Id { get; set; }
         public string QuestionText { get; set; }
-        public string OptionA { get; set; }
-        public string OptionB { get; set; }
-        public string OptionC { get; set; }
-        public string OptionD { get; set; }
-        public string CorrectOption { get; set; } // <-- new
+        public List<Awnser> Options { get; set; }
+
     }
 
     public class FullAwnser
@@ -17,9 +14,4 @@
 
     }
 
-    public class Awnser
-    {
-        public bool Correct { get; set; }
-
-    }
 }
