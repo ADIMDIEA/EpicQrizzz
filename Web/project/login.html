@@ -9,6 +9,8 @@
 <body>
   <div class="container">
     <h1>EpicQrizzz</h1>
+
+    <!-- Tabs -->
     <div class="tab-buttons">
       <button id="login-tab" class="active">Inloggen</button>
       <button id="register-tab">Registreren</button>
@@ -71,39 +73,39 @@
     }
 
     // Login API call
-loginForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const username = document.getElementById('login-username').value;
-  const password = document.getElementById('login-password').value;
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('login-password').value;
+      const username = document.getElementById('login-username').value.trim();
 
-  try {
-    const hashedPassword = await hashPassword(password);
+      try {
+        const hashedPassword = await hashPassword(password);
 
-    const res = await fetch(`/api/Login/${encodeURIComponent(username)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: hashedPassword }) // alleen password in body
+        const res = await fetch(`http://joost.assenbergh.nl:5292/api/user/Login/${encodeURIComponent(username)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enteredPassword: hashedPassword })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          // alert('Welkom! Je account-ID is: ' + data.id); <-- Logging alert :D
+          window.location.href = 'home.html';
+        } else {
+          const data = await res.json();
+          alert('Login mislukt: ' + (data.message || res.statusText));
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Er ging iets mis met inloggen');
+      }
     });
-
-    if (res.ok) {
-      const data = await res.json();
-      // Backend stuurt ID terug
-      alert('Welkom! Je account-ID is: ' + data.id);
-      window.location.href = 'home.html';
-    } else {
-      const data = await res.json();
-      alert('Login mislukt: ' + (data.message || res.statusText));
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Er ging iets mis met inloggen');
-  }
-});
 
     // Registratie API call
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('register-username').value;
+
+      const username = document.getElementById('register-username').value.trim();
       const password = document.getElementById('register-password').value;
       const password2 = document.getElementById('register-password2').value;
 
@@ -113,22 +115,27 @@ loginForm.addEventListener('submit', async (e) => {
       }
 
       try {
-        const id = generateId(); // alleen hier eenmalig
+        const id = generateId(); // unieke ID
         const hashedPassword = await hashPassword(password);
 
-        const res = await fetch('/api/login/', {
+        const res = await fetch('http://joost.assenbergh.nl:5292/api/user/CreateAccount', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, username, password: hashedPassword })
+          body: JSON.stringify({
+            id: id,
+            name: username,
+            password: hashedPassword
+          })
         });
 
         if (res.ok) {
-          alert('Account aangemaakt! Je ID is: ' + id + ' (deze wordt in de database opgeslagen)');
+          // alert('Account aangemaakt! Je ID is: ' + id); <-- SignUp alert :D
           loginTab.click(); // switch naar login
         } else {
           const data = await res.json();
           alert('Registratie mislukt: ' + (data.message || res.statusText));
         }
+
       } catch (err) {
         console.error(err);
         alert('Er ging iets mis met registreren');
