@@ -25,7 +25,7 @@ namespace MyBackend.Controllers
                 {
                     connection.Open();
 
-                    string sql = "SELECT * FROM Questions";
+                    string sql = "SELECT * FROM questions";
                     using var cmd = new MySqlCommand(sql, connection);
                     using var reader = cmd.ExecuteReader();
 
@@ -93,7 +93,7 @@ namespace MyBackend.Controllers
                 {
                     connection.Open();
 
-                    string sql = "SELECT * FROM Questions WHERE Id = @id";
+                    string sql = "SELECT * FROM questions WHERE Id = @id";
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@id", id);
                     using var reader = cmd.ExecuteReader();
@@ -146,7 +146,7 @@ namespace MyBackend.Controllers
                     connection.Open();
 
                     // Insert question
-                    string sql = "INSERT INTO Questions (question_text) VALUES (@text); SELECT LAST_INSERT_ID();";
+                    string sql = "INSERT INTO questions (question_text) VALUES (@text); SELECT LAST_INSERT_ID();";
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@text", question.QuestionText);
 
