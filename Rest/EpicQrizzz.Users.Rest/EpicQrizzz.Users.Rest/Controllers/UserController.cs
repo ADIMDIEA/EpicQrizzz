@@ -135,7 +135,7 @@ namespace MyBackend.Controllers
             }
             catch
             {
-                return Forbid();
+                return NotFound();
             }
         }
     }
