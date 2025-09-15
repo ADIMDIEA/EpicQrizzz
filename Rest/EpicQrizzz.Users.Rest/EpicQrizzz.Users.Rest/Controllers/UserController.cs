@@ -73,29 +73,31 @@ namespace MyBackend.Controllers
             }
 
         }
-        [HttpPost("Login/{id}")]
-        public IActionResult Login([FromBody] Password enteredPassword, string id)
+        [HttpPost("Login/{username}")]
+        public IActionResult Login([FromBody] Password enteredPassword, string username)
         {
             try
             {
                 var password = new Password();
+                string id = "";
                 using (var connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
-                    string sql = "SELECT password_hash, username FROM users WHERE uuid = @id";
+                    string sql = "SELECT password_hash, uuid FROM users WHERE username = @username";
                     using var cmd = new MySqlCommand(sql, connection);
-                    cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@username", username);
                     using var reader = cmd.ExecuteReader();
 
                     reader.Read();
 
                     password.enteredPassword = reader.GetString("password_hash");
+                    id = reader.GetString("uuid");
 
 
                 }
                 if (enteredPassword.enteredPassword == password.enteredPassword)
                 {
-                    return Ok();
+                    return CreatedAtAction("Login", "user", new { Id = id, Name = username });
                 }
                 else
                 {
@@ -128,7 +130,7 @@ namespace MyBackend.Controllers
                     reader.Read();
 
                 }
-                return CreatedAtAction("CreateAccount", "user", new { Id = user.Id, Name = user.Name, Password = user.Password });
+                return CreatedAtAction("CreateAccount", "user", new { Id = user.Id, Name = user.Name });
                     
             }
             catch
