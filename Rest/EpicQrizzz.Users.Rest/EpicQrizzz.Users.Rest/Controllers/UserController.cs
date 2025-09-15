@@ -80,7 +80,7 @@ namespace MyBackend.Controllers
             try
             {
                 var storedPassword = "";
-                string id = "";
+                Guid id = Guid.Empty;
                 using (var connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
@@ -95,7 +95,7 @@ namespace MyBackend.Controllers
 
                     storedPassword = reader.GetString("password_hash");
 
-                    id = reader.GetString("uuid");
+                    id = reader.GetGuid("uuid");
 
 
                 }
