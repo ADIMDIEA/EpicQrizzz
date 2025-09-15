@@ -67,3 +67,10 @@ Dit zorgt ervoor dat je een account kan maken
   "password": "hashedPassword"
 }
 ```
+
+### Login
+http://localhost:8080/api/user/Login/{username}
+
+Deze call zorgt ervoor dat je kan inloggen
+
+``````
