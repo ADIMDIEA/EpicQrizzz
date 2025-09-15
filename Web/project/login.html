@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>EpicQrizzz - Login & Registratie</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -16,17 +16,16 @@
 
     <!-- Login Form -->
     <form id="login-form" class="active">
-      <input type="text" placeholder="E-mailadres of gebruikersnaam" required>
-      <input type="password" placeholder="Wachtwoord" required>
+      <input id="login-username" type="text" placeholder="Gebruikersnaam" required />
+      <input id="login-password" type="password" placeholder="Wachtwoord" required />
       <button class="submit" type="submit">Inloggen</button>
     </form>
 
     <!-- Registratie Form -->
     <form id="register-form">
-      <input type="text" placeholder="Volledige naam" required>
-      <input type="email" placeholder="E-mailadres" required>
-      <input type="password" placeholder="Wachtwoord" required>
-      <input type="password" placeholder="Herhaal wachtwoord" required>
+      <input id="register-username" type="text" placeholder="Gebruikersnaam" required />
+      <input id="register-password" type="password" placeholder="Wachtwoord" required />
+      <input id="register-password2" type="password" placeholder="Herhaal wachtwoord" required />
       <button class="submit" type="submit">Account aanmaken</button>
     </form>
   </div>
@@ -37,6 +36,7 @@
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
 
+    // Tabs wisselen
     loginTab.addEventListener('click', () => {
       loginTab.classList.add('active');
       registerTab.classList.remove('active');
@@ -51,10 +51,88 @@
       loginForm.classList.remove('active');
     });
 
-    // Tijdelijke redirect bij inloggen
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
+    // UUID generator
+    function generateId() {
+      if (crypto.randomUUID) return crypto.randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    // SHA-256 hashing
+    async function hashPassword(password) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Login API call
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('login-username').value;
+  const password = document.getElementById('login-password').value;
+
+  try {
+    const hashedPassword = await hashPassword(password);
+
+    const res = await fetch(`/api/Login/${encodeURIComponent(username)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: hashedPassword }) // alleen password in body
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      // Backend stuurt ID terug
+      alert('Welkom! Je account-ID is: ' + data.id);
       window.location.href = 'home.html';
+    } else {
+      const data = await res.json();
+      alert('Login mislukt: ' + (data.message || res.statusText));
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Er ging iets mis met inloggen');
+  }
+});
+
+    // Registratie API call
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('register-username').value;
+      const password = document.getElementById('register-password').value;
+      const password2 = document.getElementById('register-password2').value;
+
+      if (password !== password2) {
+        alert('Wachtwoorden komen niet overeen!');
+        return;
+      }
+
+      try {
+        const id = generateId(); // alleen hier eenmalig
+        const hashedPassword = await hashPassword(password);
+
+        const res = await fetch('/api/login/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, username, password: hashedPassword })
+        });
+
+        if (res.ok) {
+          alert('Account aangemaakt! Je ID is: ' + id + ' (deze wordt in de database opgeslagen)');
+          loginTab.click(); // switch naar login
+        } else {
+          const data = await res.json();
+          alert('Registratie mislukt: ' + (data.message || res.statusText));
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Er ging iets mis met registreren');
+      }
     });
   </script>
 </body>
