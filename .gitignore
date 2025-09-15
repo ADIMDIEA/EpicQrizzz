@@ -2,8 +2,10 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/Rest/EpicQrizzz.Quetions.Rest/.vs/*
+/Rest/EpicQrizzz.Questions.Rest/.vs/*
 /Rest/EpicQrizzz.Users.Rest/.vs/*
 /Rest/EpicQrizzz.Users.Rest/.vs/*
-/Rest/EpicQrizzz.Quetions.Rest/EpicQrizzz.Quetions.Rest/obj/*
-/Rest/EpicQrizzz.Users.Rest/EpicQrizzz.Users.Rest/obj/*
+/Rest/EpicQrizzz.Questions.Rest/obj/*
+/Rest/EpicQrizzz.Users.Rest/obj/*
+/Rest/EpicQrizzz.Users.Rest/bin/*
+/Rest/EpicQrizzz.Questions.Rest/bin/*

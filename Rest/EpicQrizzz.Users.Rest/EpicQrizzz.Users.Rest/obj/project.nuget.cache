@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "fYcyMDmToJk=",
+  "dgSpecHash": "woQy/VbN3FY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Questions.Rest\\EpicQrizzz.Questions.Rest.csproj",
+  "projectFilePath": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\edimz\\.nuget\\packages\\bouncycastle.cryptography\\2.5.1\\bouncycastle.cryptography.2.5.1.nupkg.sha512",
     "C:\\Users\\edimz\\.nuget\\packages\\google.protobuf\\3.30.0\\google.protobuf.3.30.0.nupkg.sha512",
