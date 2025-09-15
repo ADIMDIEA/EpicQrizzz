@@ -112,7 +112,6 @@ namespace MyBackend.Controllers
                 return NotFound();
             }
         }
-        [Authorize]
         [HttpPost("CreateAccount")]
         public IActionResult CreateAccount([FromBody] UserCreate user)
         {
