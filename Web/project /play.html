@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EpicQrizzz - 1v1 Quiz</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .game-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 20px;
+      width: 90%;
+      max-width: 1000px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      padding: 30px;
+      align-items: start;
+    }
+
+    .player, .opponent {
+      text-align: center;
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #BBDEFB;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      color: #1976D2;
+      margin: 0 auto 10px;
+    }
+
+    .score {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #1976D2;
+      margin-top: 5px;
+    }
+
+    .quiz-area {
+      text-align: center;
+    }
+
+    .quiz-question {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #1976D2;
+    }
+
+    .timer {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #E53935;
+      margin-bottom: 15px;
+    }
+
+    .answer-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .answer-options button {
+      padding: 15px;
+      border-radius: 12px;
+      border: none;
+      background: #42A5F5;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+    }
+
+    .answer-options button:hover {
+      background: #1E88E5;
+      transform: scale(1.05);
+    }
+
+    .back-button {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: none;
+      background: #E53935;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .back-button:hover {
+      background: #C62828;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="player">
+      <div class="avatar" id="player-avatar">🙂</div>
+      <p id="player-name">Jij</p>
+      <p class="score">Score: <span id="player-score">0</span></p>
+    </div>
+
+    <div class="quiz-area">
+      <div class="timer" id="timer">30s</div>
+      <div class="quiz-question" id="quiz-question">Vraag wordt geladen...</div>
+      <div class="answer-options" id="answer-options"></div>
+      <button class="back-button" id="back-btn">Terug naar Home</button>
+    </div>
+
+    <div class="opponent">
+      <div class="avatar" id="opponent-avatar">😎</div>
+      <p id="opponent-name">Tegenstander</p>
+      <p class="score">Score: <span id="opponent-score">0</span></p>
+    </div>
+  </div>
+
+  <script>
+    const gameData = {
+      player: {
+        name: "Jij",
+        avatar: localStorage.getItem('epicqrizzz-avatar') || "🙂",
+        score: 0
+      },
+      opponent: {
+        name: "MedStudent42",
+        avatar: "👩‍⚕️",
+        score: 0
+      },
+      currentQuestion: 1,
+      winningScore: 10,
+      timePerQuestion: 30,
+      timerInterval: null
+    };
+
+    const timerElement = document.getElementById('timer');
+
+    document.getElementById('player-avatar').textContent = gameData.player.avatar;
+    document.getElementById('player-name').textContent = gameData.player.name;
+    document.getElementById('player-score').textContent = gameData.player.score;
+
+    document.getElementById('opponent-avatar').textContent = gameData.opponent.avatar;
+    document.getElementById('opponent-name').textContent = gameData.opponent.name;
+    document.getElementById('opponent-score').textContent = gameData.opponent.score;
+
+    function startTimer(callback) {
+      let timeLeft = gameData.timePerQuestion;
+      timerElement.textContent = timeLeft + 's';
+      clearInterval(gameData.timerInterval);
+      gameData.timerInterval = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = timeLeft + 's';
+        if (timeLeft <= 0) {
+          clearInterval(gameData.timerInterval);
+          callback();
+        }
+      }, 1000);
+    }
+
+    async function showQuestion(id) {
+      try {
+        const res = await fetch(`http://joost.assenbergh.nl:5291/api/Quetion/GetById/${id}`);
+        if (!res.ok) throw new Error("Netwerkfout");
+        const q = await res.json();
+
+        document.getElementById('quiz-question').textContent = q.questionText;
+        const answerContainer = document.getElementById('answer-options');
+        answerContainer.innerHTML = "";
+
+        const options = [q.optionA, q.optionB, q.optionC, q.optionD];
+        const letters = ['a', 'b', 'c', 'd'];
+
+        startTimer(() => {
+          gameData.opponent.score++;
+          document.getElementById('opponent-score').textContent = gameData.opponent.score;
+          if (gameData.player.score >= gameData.winningScore || gameData.opponent.score >= gameData.winningScore) {
+            endGame();
+          } else {
+            gameData.currentQuestion++;
+            showQuestion(gameData.currentQuestion);
+          }
+        });
+
+        options.forEach((opt, i) => {
+          const btn = document.createElement('button');
+          btn.textContent = opt;
+          btn.addEventListener('click', async () => {
+            clearInterval(gameData.timerInterval);
+            try {
+              const checkRes = await fetch(`http://joost.assenbergh.nl:5291/api/Quetion/CheckAwnser/${id}/${letters[i]}`);
+              if (!checkRes.ok) throw new Error("Netwerkfout bij checkAnswer");
+              const isCorrect = await checkRes.json();
+
+              if (isCorrect) {
+                gameData.player.score++;
+                document.getElementById('player-score').textContent = gameData.player.score;
+              } else {
+                gameData.opponent.score++;
+                document.getElementById('opponent-score').textContent = gameData.opponent.score;
+              }
+
+              if (gameData.player.score >= gameData.winningScore || gameData.opponent.score >= gameData.winningScore) {
+                endGame();
+              } else {
+                gameData.currentQuestion++;
+                showQuestion(gameData.currentQuestion);
+              }
+            } catch(err) {
+              console.error("Fout bij checkAnswer:", err);
+              alert("Fout bij controleren van antwoord.");
+            }
+          });
+          answerContainer.appendChild(btn);
+        });
+      } catch (err) {
+        console.error("Fout bij ophalen van vraag:", err);
+        document.getElementById('quiz-question').textContent = "Kon vraag niet laden.";
+      }
+    }
+
+    function endGame() {
+      clearInterval(gameData.timerInterval);
+      let message;
+      if (gameData.player.score >= gameData.winningScore) {
+        message = "Gefeliciteerd! Je hebt gewonnen 🏆";
+      } else if (gameData.opponent.score >= gameData.winningScore) {
+        message = "Helaas, je hebt verloren ❌";
+      }
+      alert(message);
+      window.location.href = 'home.html';
+    }
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      if (confirm("Weet je zeker dat je wilt stoppen? Je verliest deze ronde.")) {
+        clearInterval(gameData.timerInterval);
+        gameData.opponent.score++;
+        document.getElementById('opponent-score').textContent = gameData.opponent.score;
+        endGame();
+      }
+    });
+
+    showQuestion(gameData.currentQuestion);
+  </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EpicQrizzz - Home</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .home-container {
+      background: white;
+      border-radius: 20px;
+      padding: 50px;
+      width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .home-container h1 {
+      color: #1976D2;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar-display {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #BBDEFB;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
+      color: #1976D2;
+    }
+
+    .menu-button, .logout-button {
+      padding: 20px;
+      border-radius: 15px;
+      border: none;
+      background: #42A5F5;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      width: 80%;
+    }
+
+    .menu-button:hover, .logout-button:hover {
+      background: #1E88E5;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="home-container">
+    <h1>Welkom bij EpicQrizzz <div class="avatar-display" id="avatar-display">🙂</div></h1>
+    <button class="menu-button" onclick="window.location.href='play.html'">Spelen</button>
+    <button class="menu-button" onclick="window.location.href='profile.html'">Profiel</button>
+    <button class="logout-button" id="logout-btn">Uitloggen</button>
+  </div>
+
+  <script>
+    // Toon opgeslagen avatar uit localStorage
+    const avatarDisplay = document.getElementById('avatar-display');
+    const savedAvatar = localStorage.getItem('epicqrizzz-avatar');
+    if (savedAvatar) {
+      avatarDisplay.textContent = savedAvatar;
+    }
+
+    // Uitlogknop: verwijder lokaal opgeslagen gegevens en ga terug naar login
+    const logoutBtn = document.getElementById('logout-btn');
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('epicqrizzz-avatar');
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

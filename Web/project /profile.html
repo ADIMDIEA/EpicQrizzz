@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EpicQrizzz - Profiel</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .profile-container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    .profile-container h1 {
+      color: #1976D2;
+      margin-bottom: 20px;
+    }
+
+    .avatar-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #BBDEFB;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #1976D2;
+      margin: 0 auto 20px;
+    }
+
+    .avatar-options {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-option {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #E3F2FD;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s, border 0.3s;
+      font-size: 1.5rem;
+      color: #1976D2;
+      border: 2px solid transparent;
+    }
+
+    .avatar-option:hover {
+      transform: scale(1.1);
+      border-color: #1976D2;
+    }
+
+    button.save, button.back {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      background: #1976D2;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      margin: 5px;
+    }
+
+    button.save:hover, button.back:hover {
+      background: #1565C0;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-container">
+    <h1>Mijn Profiel</h1>
+    <div class="avatar-preview" id="avatar-preview">🙂</div>
+
+    <div class="avatar-options">
+      <div class="avatar-option">🙂</div>
+      <div class="avatar-option">😎</div>
+      <div class="avatar-option">👩‍⚕️</div>
+      <div class="avatar-option">👨‍⚕️</div>
+    </div>
+
+    <button class="save" id="save-btn">Opslaan</button>
+    <button class="back" onclick="window.location.href='home.html'">Terug</button>
+  </div>
+
+  <script>
+    const preview = document.getElementById('avatar-preview');
+    const options = document.querySelectorAll('.avatar-option');
+    const saveBtn = document.getElementById('save-btn');
+
+    // Check bij laden of er al een avatar is opgeslagen
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedAvatar = localStorage.getItem('epicqrizzz-avatar');
+      if (savedAvatar) {
+        preview.textContent = savedAvatar;
+      }
+    });
+
+    // Bij klikken op optie toon in preview
+    options.forEach(option => {
+      option.addEventListener('click', () => {
+        preview.textContent = option.textContent;
+      });
+    });
+
+    // Opslaan naar localStorage
+    saveBtn.addEventListener('click', () => {
+      const selectedAvatar = preview.textContent;
+      localStorage.setItem('epicqrizzz-avatar', selectedAvatar);
+      alert('Profiel opgeslagen!');
+    });
+  </script>
+</body>
+</html>
