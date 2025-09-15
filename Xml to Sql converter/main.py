@@ -1,65 +1,65 @@
-import xml.etree.ElementTree as ET
-import os
-import csv
+import sqlite3
+import pandas as pd
+import re
 
-# Folder containing the XML files
-folder_path = './'  # replace with your folder path if needed
+# Lees het MySQL dump bestand
+with open("kennisquiz.sql", "r", encoding="utf-8") as f:
+    sql_script = f.read()
 
-# Output CSV file
-output_file = 'questions.csv'
+# Verwijder MySQL-specifieke commando's die SQLite niet begrijpt
+patterns = [
+    r"SET .*?;\n",
+    r"START TRANSACTION;",
+    r"COMMIT;",
+    r"/\*![0-9]+ .*?\*/;",
+    r"ENGINE=.*?;",
+    r"AUTO_INCREMENT=\d+",
+    r"CHARSET=.*?(;|\n)"
+]
 
-# Namespace from QTI XML
-ns = {'qti': 'http://www.imsglobal.org/xsd/imsqti_v2p1'}
+for pat in patterns:
+    sql_script = re.sub(pat, "", sql_script, flags=re.IGNORECASE)
 
-all_questions = []
+# Maak verbinding met SQLite in-memory
+conn = sqlite3.connect(":memory:")
 
-# Loop through all XML files in the folder
-for filename in os.listdir(folder_path):
-    if filename.endswith('.xml'):
-        file_path = os.path.join(folder_path, filename)
-        try:
-            tree = ET.parse(file_path)
-            root = tree.getroot()
+# Voer het opgeschoonde SQL script uit
+conn.executescript(sql_script)
 
-            # Find correct response
-            correct_value_elem = root.find('.//qti:correctResponse/qti:value', ns)
-            correct_id = correct_value_elem.text if correct_value_elem is not None else ''
+# Query om de vragen en keuzes in jouw format te zetten
+query = """
+WITH opts AS (
+    SELECT
+        q.id AS Id,
+        q.question_text AS Question,
+        c.identifier,
+        c.choice_text,
+        c.is_correct
+    FROM questions q
+    LEFT JOIN choices c ON q.id = c.question_id
+)
+SELECT
+    Id,
+    Question,
+    MAX(CASE WHEN identifier = 'A1' THEN choice_text END) AS OptionA,
+    MAX(CASE WHEN identifier = 'A2' THEN choice_text END) AS OptionB,
+    MAX(CASE WHEN identifier = 'A3' THEN choice_text END) AS OptionC,
+    MAX(CASE WHEN identifier = 'A4' THEN choice_text END) AS OptionD,
+    CASE
+        WHEN MAX(CASE WHEN identifier = 'A1' AND is_correct = 1 THEN 'A' END) IS NOT NULL THEN 'A'
+        WHEN MAX(CASE WHEN identifier = 'A2' AND is_correct = 1 THEN 'B' END) IS NOT NULL THEN 'B'
+        WHEN MAX(CASE WHEN identifier = 'A3' AND is_correct = 1 THEN 'C' END) IS NOT NULL THEN 'C'
+        WHEN MAX(CASE WHEN identifier = 'A4' AND is_correct = 1 THEN 'D' END) IS NOT NULL THEN 'D'
+    END AS CorrectOption
+FROM opts
+GROUP BY Id, Question
+ORDER BY Id;
+"""
 
-            for item in root.findall('.//qti:itemBody', ns):
-                # Get question text safely
-                div = item.find('.//qti:div', ns)
-                if div is not None:
-                    p = div.find('p')
-                    question_text = p.text.strip() if p is not None and p.text else '—'
-                else:
-                    question_text = '—'
+df = pd.read_sql_query(query, conn)
 
-                # Get choices
-                choices = item.findall('.//qti:simpleChoice', ns)
-                option_texts = []
-                correct_option = ''
+# Bekijk de eerste regels
+print(df.head())
 
-                for i, choice in enumerate(choices):
-                    text = choice.text.strip() if choice.text else '—'
-                    option_texts.append(text)
-                    if choice.attrib.get('identifier') == correct_id:
-                        correct_option = chr(65 + i)  # A, B, C, D
-
-                # Pad options to 4
-                while len(option_texts) < 4:
-                    option_texts.append('—')
-
-                all_questions.append([question_text] + option_texts + [correct_option])
-        except ET.ParseError:
-            print(f"Error parsing {filename}, skipping this file.")
-
-# Write to CSV (tab-separated) with UTF-8 BOM for Excel compatibility
-with open(output_file, 'w', newline='', encoding='utf-8-sig') as f:
-    writer = csv.writer(f, delimiter='\t')
-    # Header
-    writer.writerow(['Id', 'Question', 'OptionA', 'OptionB', 'OptionC', 'OptionD', 'CorrectOption'])
-    # Write questions with Id
-    for idx, q in enumerate(all_questions, start=1):
-        writer.writerow([idx] + q)
-
-print(f"Conversion complete! {len(all_questions)} questions saved to {output_file}")
+# Export naar CSV
+df.to_csv("quiz_export.csv", index=False, encoding="utf-8")

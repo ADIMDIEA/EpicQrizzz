@@ -8,7 +8,7 @@
         public string OptionB { get; set; }
         public string OptionC { get; set; }
         public string OptionD { get; set; }
-        public char CorrectOption { get; set; } // <-- new
+        public string CorrectOption { get; set; } // <-- new
     }
 
     public class FullAwnser

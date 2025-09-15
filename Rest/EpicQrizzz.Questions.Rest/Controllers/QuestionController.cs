@@ -8,7 +8,7 @@ namespace MyBackend.Controllers
     [Route("api/[controller]")]
     public class QuetionController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=EpicQrizzz;User=root;Password=";
+        string connectionString = "Server=localhost;Database=kennisquiz;User=root;Password=";
 
 
         [HttpGet("GetAll")]
@@ -73,18 +73,41 @@ namespace MyBackend.Controllers
                     reader.Read();
 
                     question.Id = reader.GetInt32("Id");
-                    question.QuestionText = reader.GetString("Question");
-                    question.OptionA = reader.GetString("OptionA");
-                    question.OptionB = reader.GetString("OptionB");
-                    question.OptionC = reader.GetString("OptionC");
-                    question.OptionD = reader.GetString("OptionD");
+                    question.QuestionText = reader.GetString("question_text");
+
+                }
+
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sql = "SELECT * FROM choices WHERE question_id = @id";
+                    using var cmd = new MySqlCommand(sql, connection);
+                    cmd.Parameters.AddWithValue("@id", id);
+                    using var reader = cmd.ExecuteReader();
+
+                    string identifier = "";
+                    bool is_correct = false;
+
+                    while (reader.Read())
+                    {
+                        identifier = reader.GetString("identifier");
+                        is_correct = reader.GetBoolean("is_correct");
+                        if (identifier == "A1") { question.OptionA = reader.GetString("choice_text"); }
+                        else if (identifier == "A2") { question.OptionB = reader.GetString("choice_text"); }
+                        else if (identifier == "A3") { question.OptionC = reader.GetString("choice_text"); }
+                        else if (identifier == "A4") { question.OptionD = reader.GetString("choice_text"); }
+
+                        if (is_correct){ question.CorrectOption = reader.GetString("identifier"); }
+                    }
                 }
                 return Ok(question);
             }
-            catch
+            catch (Exception ex)
             {
-                return NotFound();
-
+                // Log the exception or inspect it
+                Console.WriteLine(ex.Message); // For debugging
+                return StatusCode(500, "An error occurred."); // Better than NotFound
             }
 
         }
