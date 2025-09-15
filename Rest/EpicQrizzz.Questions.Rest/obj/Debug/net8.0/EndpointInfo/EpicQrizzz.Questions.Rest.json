@@ -71,30 +71,7 @@
         }
       }
     },
-    "/api/Quetion/GetAwnserById/{id}": {
-      "get": {
-        "tags": [
-          "Quetion"
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Quetion/CheckAwnser/{id}/{choice}": {
+    "/api/Quetion/CheckAnswer/{id}/{choice}": {
       "get": {
         "tags": [
           "Quetion"
@@ -128,6 +105,24 @@
   },
   "components": {
     "schemas": {
+      "Awnser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "option": {
+            "type": "string",
+            "nullable": true
+          },
+          "awnserText": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "Question": {
         "type": "object",
         "properties": {
@@ -139,24 +134,11 @@
             "type": "string",
             "nullable": true
           },
-          "optionA": {
-            "type": "string",
-            "nullable": true
-          },
-          "optionB": {
-            "type": "string",
-            "nullable": true
-          },
-          "optionC": {
-            "type": "string",
-            "nullable": true
-          },
-          "optionD": {
-            "type": "string",
-            "nullable": true
-          },
-          "correctOption": {
-            "type": "string",
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Awnser"
+            },
             "nullable": true
           }
         },

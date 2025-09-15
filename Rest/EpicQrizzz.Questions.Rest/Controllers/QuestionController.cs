@@ -1,14 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
-using EpicQrizzz.Quetions.Rest.Models;
+using EpicQrizzz.Questions.Rest.Models;
 using System.Reflection.PortableExecutable;
+
+
+
 namespace MyBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class QuetionController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=kennisquiz;User=root;Password=";
+        string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
 
 
         [HttpGet("GetAll")]
@@ -16,14 +19,13 @@ namespace MyBackend.Controllers
         {
             try
             {
-                Console.WriteLine("checkpoint");
                 var questions = new List<Question>();
 
                 using (var connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
 
-                    string sql = "SELECT Id, Question, OptionA, OptionB, OptionC, OptionD, CorrectOption FROM Questions";
+                    string sql = "SELECT * FROM questions";
                     using var cmd = new MySqlCommand(sql, connection);
                     using var reader = cmd.ExecuteReader();
 
@@ -32,13 +34,40 @@ namespace MyBackend.Controllers
                         var question = new Question
                         {
                             Id = reader.GetInt32("Id"),
-                            QuestionText = reader.GetString("Question"),
-                            OptionA = reader.GetString("OptionA"),
-                            OptionB = reader.GetString("OptionB"),
-                            OptionC = reader.GetString("OptionC"),
-                            OptionD = reader.GetString("OptionD"),
+                            QuestionText = reader.GetString("question_text")
                         };
+
                         questions.Add(question);
+                    }
+                }
+
+                // Fetch choices for each question
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    foreach (var question in questions)
+                    {
+                        string sql = "SELECT * FROM choices WHERE question_id = @id";
+                        using var cmd = new MySqlCommand(sql, connection);
+                        cmd.Parameters.AddWithValue("@id", question.Id);
+
+                        using var reader = cmd.ExecuteReader();
+                        var answers = new List<Awnser>();
+
+                        while (reader.Read())
+                        {
+                            var answer = new Awnser
+                            {
+                                Id = reader.GetInt32("Id"),
+                                AwnserText = reader.GetString("choice_text"),
+                                Option = reader.GetString("identifier")
+                            };
+
+                            answers.Add(answer);
+                        }
+
+                        question.Options = answers;
                     }
                 }
 
@@ -46,12 +75,11 @@ namespace MyBackend.Controllers
             }
             catch (Exception ex)
             {
-                // Return a simple error message
                 Console.WriteLine(ex.Message);
-
-                return BadRequest(new { error = ex.Message });
+                return StatusCode(500, "An error occurred.");
             }
         }
+
 
 
         [HttpGet("GetById/{id}")]
@@ -65,7 +93,7 @@ namespace MyBackend.Controllers
                 {
                     connection.Open();
 
-                    string sql = "SELECT * FROM Questions WHERE Id = @id";
+                    string sql = "SELECT * FROM questions WHERE Id = @id";
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@id", id);
                     using var reader = cmd.ExecuteReader();
@@ -85,21 +113,17 @@ namespace MyBackend.Controllers
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@id", id);
                     using var reader = cmd.ExecuteReader();
-
-                    string identifier = "";
-                    bool is_correct = false;
-
+                    var awnsers = new List<Awnser>();
                     while (reader.Read())
                     {
-                        identifier = reader.GetString("identifier");
-                        is_correct = reader.GetBoolean("is_correct");
-                        if (identifier == "A1") { question.OptionA = reader.GetString("choice_text"); }
-                        else if (identifier == "A2") { question.OptionB = reader.GetString("choice_text"); }
-                        else if (identifier == "A3") { question.OptionC = reader.GetString("choice_text"); }
-                        else if (identifier == "A4") { question.OptionD = reader.GetString("choice_text"); }
-
-                        if (is_correct){ question.CorrectOption = reader.GetString("identifier"); }
+                        var awnser = new Awnser();
+                        awnser.Id = reader.GetInt32("Id");
+                        awnser.AwnserText = reader.GetString("choice_text");
+                        awnser.Option = reader.GetString("identifier");
+                        awnsers.Add(awnser);
                     }
+
+                    question.Options = awnsers;
                 }
                 return Ok(question);
             }
@@ -121,98 +145,75 @@ namespace MyBackend.Controllers
                 {
                     connection.Open();
 
-                    string sql = @"INSERT INTO Questions 
-                          (Question, OptionA, OptionB, OptionC, OptionD, CorrectOption) 
-                          VALUES (@Question, @OptionA, @OptionB, @OptionC, @OptionD, @CorrectOption);
-                          SELECT LAST_INSERT_ID();";
-
+                    // Insert question
+                    string sql = "INSERT INTO questions (question_text) VALUES (@text); SELECT LAST_INSERT_ID();";
                     using var cmd = new MySqlCommand(sql, connection);
+                    cmd.Parameters.AddWithValue("@text", question.QuestionText);
 
-                    cmd.Parameters.AddWithValue("@Question", question.QuestionText);
-                    cmd.Parameters.AddWithValue("@OptionA", question.OptionA);
-                    cmd.Parameters.AddWithValue("@OptionB", question.OptionB);
-                    cmd.Parameters.AddWithValue("@OptionC", question.OptionC);
-                    cmd.Parameters.AddWithValue("@OptionD", question.OptionD);
-                    cmd.Parameters.AddWithValue("@CorrectOption", question.CorrectOption); // <-- added
-
-                    // Execute and get new ID
                     var newId = Convert.ToInt32(cmd.ExecuteScalar());
                     question.Id = newId;
+
+                    // Insert choices if provided
+                    if (question.Options != null && question.Options.Any())
+                    {
+                        foreach (var option in question.Options)
+                        {
+                            string choiceSql = "INSERT INTO choices (choice_text, identifier, question_id) VALUES (@text, @identifier, @qid)";
+                            using var choiceCmd = new MySqlCommand(choiceSql, connection);
+                            choiceCmd.Parameters.AddWithValue("@text", option.AwnserText);
+                            choiceCmd.Parameters.AddWithValue("@identifier", option.Option);
+                            choiceCmd.Parameters.AddWithValue("@qid", newId);
+                            choiceCmd.ExecuteNonQuery();
+                        }
+                    }
                 }
 
-                return CreatedAtAction(nameof(GetById), new { id = question.Id }, question);
+                return Ok(question); // Return the created question with Id
             }
             catch (Exception ex)
             {
-                return BadRequest(new { error = ex.Message });
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "An error occurred.");
             }
         }
 
 
 
-        [HttpGet("GetAwnserById/{id}")]
-        public IActionResult GetAwnserById(int id)
+        [HttpGet("CheckAnswer/{id}/{choice}")]
+        public IActionResult CheckAnswer(int id, string choice)
         {
             try
             {
-                var awnser = new FullAwnser();
-
-                using (var connection = new MySqlConnection(connectionString))
-                {
-                    connection.Open();
-
-                    string sql = "SELECT * FROM Questions WHERE Id = @id";
-                    using var cmd = new MySqlCommand(sql, connection);
-                    cmd.Parameters.AddWithValue("@id", id);
-                    using var reader = cmd.ExecuteReader();
-
-                    reader.Read();
-
-                    awnser.CorrectOption = reader.GetChar("CorrectOption");
-
-                }
-                return Ok(awnser);
-            }
-            catch
-            {
-                return NotFound();
-
-            }
-        }
-
-
-        [HttpGet("CheckAwnser/{id}/{choice}")]
-        public IActionResult CheckAwnser(int id, char choice)
-        {
-            try
-            {
-                var awnser = new FullAwnser();
                 bool correct = false;
+
                 using (var connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
 
-                    string sql = "SELECT * FROM Questions WHERE Id = @id";
+                    string sql = @"SELECT is_correct 
+                           FROM choices 
+                           WHERE question_id = @id AND identifier = @choice";
+
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@id", id);
-                    using var reader = cmd.ExecuteReader();
+                    cmd.Parameters.AddWithValue("@choice", choice.ToUpper());
 
-                    reader.Read();
+                    var result = cmd.ExecuteScalar();
 
-                    awnser.CorrectOption = reader.GetChar("CorrectOption");
-                    if (awnser.CorrectOption.ToString() == choice.ToString().ToUpper())
+                    if (result != null && Convert.ToBoolean(result))
                     {
                         correct = true;
                     }
-
                 }
+
                 return Ok(correct);
             }
-            catch
+            catch (Exception ex)
             {
-                return NotFound();
-
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "An error occurred.");
             }
         }
+
     }
 }
