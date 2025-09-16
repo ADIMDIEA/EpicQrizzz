@@ -11,7 +11,7 @@
       border-radius: 20px;
       padding: 50px;
       width: 400px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       text-align: center;
       display: flex;
       flex-direction: column;
@@ -20,7 +20,7 @@
     }
 
     .home-container h1 {
-      color: #1976D2;
+      color: #E72B76;
       margin-bottom: 10px;
       display: flex;
       align-items: center;
@@ -31,19 +31,19 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: #BBDEFB;
+      background: #F8BBD0;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 1.5rem;
-      color: #1976D2;
+      color: #E72B76;
     }
 
     .menu-button, .logout-button {
       padding: 20px;
       border-radius: 15px;
       border: none;
-      background: #42A5F5;
+      background: #E72B76;
       color: white;
       font-size: 1.2rem;
       font-weight: bold;
@@ -53,7 +53,7 @@
     }
 
     .menu-button:hover, .logout-button:hover {
-      background: #1E88E5;
+      background: #C2185B;
       transform: scale(1.05);
     }
   </style>
@@ -74,7 +74,7 @@
       avatarDisplay.textContent = savedAvatar;
     }
 
-    // Uitlogknop: verwijder lokaal opgeslagen gegevens en ga terug naar login
+    // Uitlogknop
     const logoutBtn = document.getElementById('logout-btn');
     logoutBtn.addEventListener('click', () => {
       localStorage.removeItem('epicqrizzz-avatar');
