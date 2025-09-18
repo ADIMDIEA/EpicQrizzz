@@ -15,7 +15,7 @@
       margin: 40px auto;
       background: white;
       border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
       padding: 30px;
       align-items: start;
     }
@@ -28,19 +28,19 @@
       width: 80px;
       height: 80px;
       border-radius: 50%;
-      background: #F8BBD0;
+      background: #BBDEFB;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 2rem;
-      color: #E72B76;
+      color: #1976D2;
       margin: 0 auto 10px;
     }
 
     .score {
       font-size: 1.2rem;
       font-weight: bold;
-      color: #E72B76;
+      color: #1976D2;
       margin-top: 5px;
     }
 
@@ -52,13 +52,13 @@
       font-size: 1.5rem;
       margin-bottom: 20px;
       font-weight: bold;
-      color: #E72B76;
+      color: #1976D2;
     }
 
     .timer {
       font-size: 1.2rem;
       font-weight: bold;
-      color: #C2185B;
+      color: #E53935;
       margin-bottom: 15px;
     }
 
@@ -73,7 +73,7 @@
       padding: 15px;
       border-radius: 12px;
       border: none;
-      background: #E72B76;
+      background: #42A5F5;
       color: white;
       font-size: 1rem;
       font-weight: bold;
@@ -82,7 +82,7 @@
     }
 
     .answer-options button:hover {
-      background: #C2185B;
+      background: #1E88E5;
       transform: scale(1.05);
     }
 
@@ -90,7 +90,7 @@
       padding: 12px 20px;
       border-radius: 12px;
       border: none;
-      background: #C2185B;
+      background: #E53935;
       color: white;
       font-size: 1rem;
       font-weight: bold;
@@ -101,7 +101,7 @@
     }
 
     .back-button:hover {
-      background: #880E4F;
+      background: #C62828;
       transform: scale(1.05);
     }
   </style>
@@ -129,8 +129,130 @@
   </div>
 
   <script>
-    /* Zelfde JS als je originele code */
-    /* ... (niet aangepast) ... */
+    const gameData = {
+      player: {
+        name: "Jij",
+        avatar: localStorage.getItem('epicqrizzz-avatar') || "🙂",
+        score: 0
+      },
+      opponent: {
+        name: "MedStudent42",
+        avatar: "👩‍⚕️",
+        score: 0
+      },
+      currentQuestion: 1,
+      winningScore: 10,
+      timePerQuestion: 30,
+      timerInterval: null
+    };
+
+    const timerElement = document.getElementById('timer');
+
+    document.getElementById('player-avatar').textContent = gameData.player.avatar;
+    document.getElementById('player-name').textContent = gameData.player.name;
+    document.getElementById('player-score').textContent = gameData.player.score;
+
+    document.getElementById('opponent-avatar').textContent = gameData.opponent.avatar;
+    document.getElementById('opponent-name').textContent = gameData.opponent.name;
+    document.getElementById('opponent-score').textContent = gameData.opponent.score;
+
+    function startTimer(callback) {
+      let timeLeft = gameData.timePerQuestion;
+      timerElement.textContent = timeLeft + 's';
+      clearInterval(gameData.timerInterval);
+      gameData.timerInterval = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = timeLeft + 's';
+        if (timeLeft <= 0) {
+          clearInterval(gameData.timerInterval);
+          callback();
+        }
+      }, 1000);
+    }
+
+    async function showQuestion(id) {
+      try {
+        const res = await fetch(`http://joost.assenbergh.nl:5291/api/Quetion/GetById/${id}`);
+        if (!res.ok) throw new Error("Netwerkfout");
+        const q = await res.json();
+
+        document.getElementById('quiz-question').textContent = q.questionText;
+        const answerContainer = document.getElementById('answer-options');
+        answerContainer.innerHTML = "";
+
+        // Timer starten
+        startTimer(() => {
+          gameData.opponent.score++;
+          document.getElementById('opponent-score').textContent = gameData.opponent.score;
+          if (gameData.player.score >= gameData.winningScore || gameData.opponent.score >= gameData.winningScore) {
+            endGame();
+          } else {
+            gameData.currentQuestion++;
+            showQuestion(gameData.currentQuestion);
+          }
+        });
+
+        // Dynamisch knoppen maken op basis van q.options (2–6 antwoorden)
+        q.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.textContent = opt.awnserText;
+          btn.addEventListener('click', async () => {
+            clearInterval(gameData.timerInterval);
+            try {
+              const checkRes = await fetch(`http://joost.assenbergh.nl:5291/api/Quetion/CheckAwnser/${id}/${opt.id}`);
+              if (!checkRes.ok) throw new Error("Netwerkfout bij checkAnswer");
+              const isCorrect = await checkRes.json();
+
+              if (isCorrect) {
+                gameData.player.score++;
+                document.getElementById('player-score').textContent = gameData.player.score;
+              } else {
+                gameData.opponent.score++;
+                document.getElementById('opponent-score').textContent = gameData.opponent.score;
+              }
+
+              if (gameData.player.score >= gameData.winningScore || gameData.opponent.score >= gameData.winningScore) {
+                endGame();
+              } else {
+                gameData.currentQuestion++;
+                showQuestion(gameData.currentQuestion);
+              }
+            } catch(err) {
+              console.error("Fout bij checkAnswer:", err);
+              alert("Fout bij controleren van antwoord.");
+            }
+          });
+          answerContainer.appendChild(btn);
+        });
+      } catch (err) {
+        console.error("Fout bij ophalen van vraag:", err);
+        document.getElementById('quiz-question').textContent = "Kon vraag niet laden.";
+      }
+    }
+
+    function endGame() {
+      clearInterval(gameData.timerInterval);
+      let message;
+      if (gameData.player.score >= gameData.winningScore) {
+        message = "Gefeliciteerd! Je hebt gewonnen 🏆";
+      } else if (gameData.opponent.score >= gameData.winningScore) {
+        message = "Helaas, je hebt verloren ❌";
+      }
+      alert(message);
+      window.location.href = 'home.html';
+    }
+
+    document.getElementById('back-btn').addEventListener('click', () => {
+      if (confirm("Weet je zeker dat je wilt stoppen? Je verliest deze ronde.")) {
+        clearInterval(gameData.timerInterval);
+        gameData.opponent.score++;
+        document.getElementById('opponent-score').textContent = gameData.opponent.score;
+        endGame();
+      }
+    });
+
+    // Start met de eerste vraag
+    showQuestion(gameData.currentQuestion);
   </script>
 </body>
 </html>
