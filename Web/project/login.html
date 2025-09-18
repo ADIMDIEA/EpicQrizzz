@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>EpicQrizzz - Login & Registratie</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Minimal styles for demonstration */
+    .container { max-width: 400px; margin: 50px auto; text-align: center; }
+    .tab-buttons button { margin: 0 5px; padding: 10px 20px; cursor: pointer; }
+    .tab-buttons .active { font-weight: bold; }
+    form { display: none; flex-direction: column; gap: 10px; margin-top: 20px; }
+    form.active { display: flex; }
+    input { padding: 10px; width: 100%; }
+    button.submit { padding: 10px; cursor: pointer; }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -31,12 +41,14 @@
   </div>
 
   <script>
+    const backendBase = "http://joost.assenbergh.nl:5292/api/User";
+
     const loginTab = document.getElementById('login-tab');
     const registerTab = document.getElementById('register-tab');
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
 
-    // Tabs wisselen
+    // Switch tabs
     loginTab.addEventListener('click', () => {
       loginTab.classList.add('active');
       registerTab.classList.remove('active');
@@ -70,37 +82,34 @@
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // Login API call
-loginForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const username = document.getElementById('login-username').value;
-  const password = document.getElementById('login-password').value;
+    // Login
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
 
-  try {
-    const hashedPassword = await hashPassword(password);
+      try {
+        const hashedPassword = await hashPassword(password);
+        const res = await fetch(`${backendBase}/Login/${encodeURIComponent(username)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enteredPassword: hashedPassword })
+        });
 
-    const res = await fetch(`/api/Login/${encodeURIComponent(username)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: hashedPassword }) // alleen password in body
+        if (res.ok) {
+          const data = await res.json();
+          alert('Welkom! Je account-ID is: ' + data.id);
+          window.location.href = 'home.html';
+        } else {
+          alert('Login mislukt: ' + res.statusText);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Er ging iets mis met inloggen');
+      }
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      // Backend stuurt ID terug
-      alert('Welkom! Je account-ID is: ' + data.id);
-      window.location.href = 'home.html';
-    } else {
-      const data = await res.json();
-      alert('Login mislukt: ' + (data.message || res.statusText));
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Er ging iets mis met inloggen');
-  }
-});
-
-    // Registratie API call
+    // Register
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('register-username').value;
@@ -113,27 +122,40 @@ loginForm.addEventListener('submit', async (e) => {
       }
 
       try {
-        const id = generateId(); // alleen hier eenmalig
+        const id = generateId();
         const hashedPassword = await hashPassword(password);
-
-        const res = await fetch('/api/login/', {
+        const res = await fetch(`${backendBase}/CreateAccount`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id, username, password: hashedPassword })
+          body: JSON.stringify({ Id: id, Name: username, Password: hashedPassword })
         });
 
         if (res.ok) {
-          alert('Account aangemaakt! Je ID is: ' + id + ' (deze wordt in de database opgeslagen)');
-          loginTab.click(); // switch naar login
+          alert('Account aangemaakt! Je ID is: ' + id);
+          loginTab.click();
         } else {
-          const data = await res.json();
-          alert('Registratie mislukt: ' + (data.message || res.statusText));
+          alert('Registratie mislukt: ' + res.statusText);
         }
       } catch (err) {
         console.error(err);
         alert('Er ging iets mis met registreren');
       }
     });
+
+    // Optional: fetch all users for testing
+    async function fetchAllUsers() {
+      try {
+        const res = await fetch(`${backendBase}/GetAll`);
+        if (res.ok) {
+          const users = await res.json();
+          console.log('All users:', users);
+        }
+      } catch (err) {
+        console.error('Failed to fetch users:', err);
+      }
+    }
+
+    // fetchAllUsers(); // uncomment to debug
   </script>
 </body>
 </html>
