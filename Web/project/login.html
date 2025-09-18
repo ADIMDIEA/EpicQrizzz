@@ -19,6 +19,8 @@
 <body>
   <div class="container">
     <h1>EpicQrizzz</h1>
+
+    <!-- Tabs -->
     <div class="tab-buttons">
       <button id="login-tab" class="active">Inloggen</button>
       <button id="register-tab">Registreren</button>
@@ -82,6 +84,7 @@
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+<<<<<<< HEAD
     // Login
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -102,6 +105,30 @@
           window.location.href = 'home.html';
         } else {
           alert('Login mislukt: ' + res.statusText);
+=======
+    // Login API call
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const password = document.getElementById('login-password').value;
+      const username = document.getElementById('login-username').value.trim();
+
+      try {
+        const hashedPassword = await hashPassword(password);
+
+        const res = await fetch(`http://joost.assenbergh.nl:5292/api/user/Login/${encodeURIComponent(username)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enteredPassword: hashedPassword })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          // alert('Welkom! Je account-ID is: ' + data.id); <-- Logging alert :D
+          window.location.href = 'home.html';
+        } else {
+          const data = await res.json();
+          alert('Login mislukt: ' + (data.message || res.statusText));
+>>>>>>> fd5b9b61de6ea91878f4ee59158667597df1d1e2
         }
       } catch (err) {
         console.error(err);
@@ -109,10 +136,15 @@
       }
     });
 
+<<<<<<< HEAD
     // Register
+=======
+    // Registratie API call
+>>>>>>> fd5b9b61de6ea91878f4ee59158667597df1d1e2
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const username = document.getElementById('register-username').value;
+
+      const username = document.getElementById('register-username').value.trim();
       const password = document.getElementById('register-password').value;
       const password2 = document.getElementById('register-password2').value;
 
@@ -122,6 +154,7 @@
       }
 
       try {
+<<<<<<< HEAD
         const id = generateId();
         const hashedPassword = await hashPassword(password);
         const res = await fetch(`${backendBase}/CreateAccount`, {
@@ -133,9 +166,28 @@
         if (res.ok) {
           alert('Account aangemaakt! Je ID is: ' + id);
           loginTab.click();
+=======
+        const id = generateId(); // unieke ID
+        const hashedPassword = await hashPassword(password);
+
+        const res = await fetch('http://joost.assenbergh.nl:5292/api/user/CreateAccount', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: id,
+            name: username,
+            password: hashedPassword
+          })
+        });
+
+        if (res.ok) {
+          // alert('Account aangemaakt! Je ID is: ' + id); <-- SignUp alert :D
+          loginTab.click(); // switch naar login
+>>>>>>> fd5b9b61de6ea91878f4ee59158667597df1d1e2
         } else {
           alert('Registratie mislukt: ' + res.statusText);
         }
+
       } catch (err) {
         console.error(err);
         alert('Er ging iets mis met registreren');
