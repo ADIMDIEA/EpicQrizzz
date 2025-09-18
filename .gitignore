@@ -3,9 +3,11 @@
 ################################################################################
 
 /Rest/EpicQrizzz.Questions.Rest/.vs/*
-/Rest/EpicQrizzz.Users.Rest/.vs/*
-/Rest/EpicQrizzz.Users.Rest/.vs/*
+/Rest/EpicQrizzz.Users.Rest/EpicQrizzz.Users.Rest/.vs/*
 /Rest/EpicQrizzz.Questions.Rest/obj/*
 /Rest/EpicQrizzz.Users.Rest/EpicQrizzz.Users.Rest/obj/*
 /Rest/EpicQrizzz.Users.Rest/EpicQrizzz.Users.Rest/bin/*
 /Rest/EpicQrizzz.Questions.Rest/bin/*
+/Rest/EpicQrizzz.Game.Rest/EpicQrizzz.Game.Rest/obj/*
+/Rest/EpicQrizzz.Game.Rest/EpicQrizzz.Game.Rest/bin/*
+/Rest/EpicQrizzz.Game.Rest/EpicQrizzz.Game.Rest/.vs/*
