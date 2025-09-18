@@ -1,0 +1,45 @@
+body { font-family: 'Poppins', sans-serif; background: #F9F9F9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+
+/* Home */
+.home-container { background: white; border-radius: 20px; padding: 50px; width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+.home-container h1 { color: #E72B76; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+.avatar-display { width: 40px; height: 40px; border-radius: 50%; background: #F8BBD0; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; color: #E72B76; }
+.menu-button, .logout-button { padding: 20px; border-radius: 15px; border: none; background: #E72B76; color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.3s; width: 80%; }
+.menu-button:hover, .logout-button:hover { background: #C2185B; transform: scale(1.05); }
+
+/* Login & Register */
+.container { max-width: 400px; margin: 50px auto; text-align: center; }
+h1 { margin-bottom: 20px; color: #E72B76; font-size: 1.8rem; }
+.tab-buttons { display: flex; justify-content: space-around; margin-bottom: 20px; }
+.tab-buttons button { flex: 1; background: #FCE4EC; border: none; padding: 10px; cursor: pointer; border-radius: 10px; font-weight: bold; color: #E72B76; margin: 0 5px; transition: background 0.3s; }
+.tab-buttons button.active { background: #E72B76; color: white; }
+form { display: none; flex-direction: column; }
+form.active { display: flex; }
+input { margin: 10px 0; padding: 12px; border-radius: 10px; border: 2px solid #F8BBD0; outline: none; font-size: 1rem; }
+input:focus { border-color: #E72B76; }
+button.submit { margin-top: 15px; padding: 12px; border: none; border-radius: 12px; background: #E72B76; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.3s; }
+button.submit:hover { background: #C2185B; transform: scale(1.05); }
+
+/* Play */
+.game-container { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 20px; width: 90%; max-width: 1000px; margin: 40px auto; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); padding: 30px; align-items: start; }
+.player, .opponent { text-align: center; }
+.avatar { width: 80px; height: 80px; border-radius: 50%; background: #BBDEFB; display: flex; justify-content: center; align-items: center; font-size: 2rem; color: #1976D2; margin: 0 auto 10px; }
+.score { font-size: 1.2rem; font-weight: bold; color: #1976D2; margin-top: 5px; }
+.quiz-area { text-align: center; }
+.quiz-question { font-size: 1.5rem; margin-bottom: 20px; font-weight: bold; color: #1976D2; }
+.timer { font-size: 1.2rem; font-weight: bold; color: #E53935; margin-bottom: 15px; }
+.answer-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+.answer-options button { padding: 15px; border-radius: 12px; border: none; background: #42A5F5; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.3s; }
+.answer-options button:hover { background: #1E88E5; transform: scale(1.05); }
+.back-button { padding: 12px 20px; border-radius: 12px; border: none; background: #E53935; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.3s; display: block; margin: 0 auto; }
+.back-button:hover { background: #C62828; transform: scale(1.05); }
+
+/* Profile */
+.profile-container { background: white; border-radius: 20px; padding: 40px; width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+.profile-container h1 { color: #E72B76; margin-bottom: 20px; }
+.avatar-preview { width: 120px; height: 120px; border-radius: 50%; background: #F8BBD0; display: flex; justify-content: center; align-items: center; font-size: 2rem; font-weight: bold; color: #E72B76; margin: 0 auto 20px; }
+.avatar-options { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+.avatar-option { width: 60px; height: 60px; border-radius: 50%; background: #FCE4EC; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: transform 0.2s, border 0.3s; font-size: 1.5rem; color: #E72B76; border: 2px solid transparent; }
+.avatar-option:hover { transform: scale(1.1); border-color: #E72B76; }
+button.save, button.back { padding: 12px 20px; border: none; border-radius: 12px; background: #E72B76; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.3s; margin: 5px; }
+button.save:hover, button.back:hover { background: #C2185B; transform: scale(1.05); }
