@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
 using EpicQrizzz.Questions.Rest.Models;
 using System.Reflection.PortableExecutable;
+using Microsoft.AspNetCore.Authorization;
 
 
 
@@ -135,7 +136,7 @@ namespace MyBackend.Controllers
             }
 
         }
-
+        [AllowAnonymous]
         [HttpPost("Add")]
         public IActionResult Add([FromBody] Question question)
         {
