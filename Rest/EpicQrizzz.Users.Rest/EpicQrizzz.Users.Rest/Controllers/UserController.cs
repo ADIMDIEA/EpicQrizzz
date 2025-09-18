@@ -5,6 +5,7 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Reflection.PortableExecutable;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 namespace MyBackend.Controllers
 {
     [ApiController]
@@ -78,8 +79,8 @@ namespace MyBackend.Controllers
         {
             try
             {
-                var password = new Password();
-                string id = "";
+                var storedPassword = "";
+                Guid id = Guid.Empty;
                 using (var connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
@@ -87,28 +88,31 @@ namespace MyBackend.Controllers
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@username", username);
                     using var reader = cmd.ExecuteReader();
+                    if (!reader.Read())
+                    {
+                        return NotFound();
+                    }
 
-                    reader.Read();
+                    storedPassword = reader.GetString("password_hash");
 
-                    password.enteredPassword = reader.GetString("password_hash");
-                    id = reader.GetString("uuid");
+                    id = reader.GetGuid("uuid");
 
 
                 }
-                if (enteredPassword.enteredPassword == password.enteredPassword)
+                if (enteredPassword.enteredPassword == storedPassword)
                 {
                     return CreatedAtAction("Login", "user", new { Id = id, Name = username });
                 }
                 else
                 {
-                    return NotFound();
+                    return Unauthorized("Invalid password");
                 }
 
 
             }
-            catch
+            catch (Exception ex)
             {
-                return NotFound();
+                return StatusCode(500, $"Server error: {ex.Message}");
             }
         }
         [HttpPost("CreateAccount")]
@@ -116,7 +120,7 @@ namespace MyBackend.Controllers
         {
             try
             {   
-                if (user.Password.Length != 64) return Forbid();
+                if (user.Password.Length != 64) return NotFound();
                 using var connection = new MySqlConnection(connectionString);
                 {
                     connection.Open();
@@ -135,7 +139,7 @@ namespace MyBackend.Controllers
             }
             catch
             {
-                return Forbid();
+                return NotFound();
             }
         }
     }
