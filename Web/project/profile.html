@@ -11,12 +11,12 @@
       border-radius: 20px;
       padding: 40px;
       width: 400px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
       text-align: center;
     }
 
     .profile-container h1 {
-      color: #1976D2;
+      color: #E72B76;
       margin-bottom: 20px;
     }
 
@@ -24,13 +24,13 @@
       width: 120px;
       height: 120px;
       border-radius: 50%;
-      background: #BBDEFB;
+      background: #F8BBD0;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 2rem;
       font-weight: bold;
-      color: #1976D2;
+      color: #E72B76;
       margin: 0 auto 20px;
     }
 
@@ -45,27 +45,27 @@
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: #E3F2FD;
+      background: #FCE4EC;
       display: flex;
       justify-content: center;
       align-items: center;
       cursor: pointer;
       transition: transform 0.2s, border 0.3s;
       font-size: 1.5rem;
-      color: #1976D2;
+      color: #E72B76;
       border: 2px solid transparent;
     }
 
     .avatar-option:hover {
       transform: scale(1.1);
-      border-color: #1976D2;
+      border-color: #E72B76;
     }
 
     button.save, button.back {
       padding: 12px 20px;
       border: none;
       border-radius: 12px;
-      background: #1976D2;
+      background: #E72B76;
       color: white;
       font-size: 1rem;
       font-weight: bold;
@@ -75,7 +75,7 @@
     }
 
     button.save:hover, button.back:hover {
-      background: #1565C0;
+      background: #C2185B;
       transform: scale(1.05);
     }
   </style>
@@ -101,7 +101,6 @@
     const options = document.querySelectorAll('.avatar-option');
     const saveBtn = document.getElementById('save-btn');
 
-    // Check bij laden of er al een avatar is opgeslagen
     window.addEventListener('DOMContentLoaded', () => {
       const savedAvatar = localStorage.getItem('epicqrizzz-avatar');
       if (savedAvatar) {
@@ -109,14 +108,12 @@
       }
     });
 
-    // Bij klikken op optie toon in preview
     options.forEach(option => {
       option.addEventListener('click', () => {
         preview.textContent = option.textContent;
       });
     });
 
-    // Opslaan naar localStorage
     saveBtn.addEventListener('click', () => {
       const selectedAvatar = preview.textContent;
       localStorage.setItem('epicqrizzz-avatar', selectedAvatar);
