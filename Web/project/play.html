@@ -180,9 +180,7 @@
         const answerContainer = document.getElementById('answer-options');
         answerContainer.innerHTML = "";
 
-        const options = [q.optionA, q.optionB, q.optionC, q.optionD];
-        const letters = ['a', 'b', 'c', 'd'];
-
+        // Timer starten
         startTimer(() => {
           gameData.opponent.score++;
           document.getElementById('opponent-score').textContent = gameData.opponent.score;
@@ -194,13 +192,14 @@
           }
         });
 
-        options.forEach((opt, i) => {
+        // Dynamisch knoppen maken op basis van q.options (2–6 antwoorden)
+        q.options.forEach(opt => {
           const btn = document.createElement('button');
-          btn.textContent = opt;
+          btn.textContent = opt.awnserText;
           btn.addEventListener('click', async () => {
             clearInterval(gameData.timerInterval);
             try {
-              const checkRes = await fetch(`http://joost.assenbergh.nl:5291/api/Quetion/CheckAwnser/${id}/${letters[i]}`);
+              const checkRes = await fetch(`http://joost.assenbergh.nl:5291/api/Quetion/CheckAwnser/${id}/${opt.id}`);
               if (!checkRes.ok) throw new Error("Netwerkfout bij checkAnswer");
               const isCorrect = await checkRes.json();
 
@@ -252,6 +251,7 @@
       }
     });
 
+    // Start met de eerste vraag
     showQuestion(gameData.currentQuestion);
   </script>
 </body>
