@@ -1,32 +1,65 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EpicQrizzz - Login/Register</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <title>JS Frontend</title>
 </head>
 <body>
-  <div class="container">
-    <h1>EpicQrizzz</h1>
-    <div class="tab-buttons">
-      <button id="login-tab" class="active">Login</button>
-      <button id="register-tab">Register</button>
-    </div>
+    <h1>Frontend talking to C# Backend</h1>
+    <input type="number" id="quetionId" name="name">
 
-    <form id="login-form" class="active">
-      <input type="text" id="login-username" placeholder="Username" required>
-      <input type="password" id="login-password" placeholder="Password" required>
-      <button type="submit" class="submit">Login</button>
-    </form>
+    <button id="Ask">krijg vraag</button>
+    <p id="quetion"></p>
+    <li id="optionA"></li>
+    <li id="optionB"></li>
+    <li id="optionC"></li>
+    <li id="optionD"></li>
 
-    <form id="register-form">
-      <input type="text" id="register-username" placeholder="Username" required>
-      <input type="password" id="register-password" placeholder="Password" required>
-      <button type="submit" class="submit">Register</button>
-    </form>
-  </div>
 
-  <script src="assets/js/login.js"></script>
+    <input type="text" id="check" name="name">
+    <button id="send">send</button>
+
+    <p id="awnser"></p>
+    <script>
+
+
+
+    document.getElementById("Ask").addEventListener("click", async () => {
+        try {
+        let res = await fetch(`https://localhost:7112/api/Quetion/GetById/${quetionId.value}`);
+        let data = await res.json();
+
+        console.log(data.questionText);
+        document.getElementById("quetion").innerHTML = data.questionText;
+        document.getElementById("optionA").innerHTML = "A = " + data.optionA;
+        document.getElementById("optionB").innerHTML = "B = " + data.optionB;
+        document.getElementById("optionC").innerHTML = "C = " + data.optionC;
+        document.getElementById("optionD").innerHTML = "D = " + data.optionD;
+
+
+        } catch (err) {
+        console.error("Error:", err);
+        }
+    });
+
+    document.getElementById("send").addEventListener("click", async () => {
+        try {
+        let res = await fetch(`https://localhost:7112/api/Quetion/CheckAwnser/${quetionId.value}/${check.value}`);
+        let data = await res.json();
+        console.log(data);
+        if (data){document.getElementById("awnser").innerHTML = "CORRECT";}
+        else{document.getElementById("awnser").innerHTML = "FOUT";}
+
+        } catch (err) {
+        console.error("Error:", err);
+        }
+    });
+
+
+
+  </script>
+
+
+
 </body>
 </html>

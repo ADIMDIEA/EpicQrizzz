@@ -1,34 +1,46 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>EpicQrizzz - Login & Registratie</title>
-<link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EpicQrizzz - Login & Registratie</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Minimal styles for demonstration */
+    .container { max-width: 400px; margin: 50px auto; text-align: center; }
+    .tab-buttons button { margin: 0 5px; padding: 10px 20px; cursor: pointer; }
+    .tab-buttons .active { font-weight: bold; }
+    form { display: none; flex-direction: column; gap: 10px; margin-top: 20px; }
+    form.active { display: flex; }
+    input { padding: 10px; width: 100%; }
+    button.submit { padding: 10px; cursor: pointer; }
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>EpicQrizzz</h1>
-  <div class="tab-buttons">
-    <button id="login-tab" class="active">Inloggen</button>
-    <button id="register-tab">Registreren</button>
+  <div class="container">
+    <h1>EpicQrizzz</h1>
+    <div class="tab-buttons">
+      <button id="login-tab" class="active">Inloggen</button>
+      <button id="register-tab">Registreren</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form" class="active">
+      <input id="login-username" type="text" placeholder="Gebruikersnaam" required />
+      <input id="login-password" type="password" placeholder="Wachtwoord" required />
+      <button class="submit" type="submit">Inloggen</button>
+    </form>
+
+    <!-- Registratie Form -->
+    <form id="register-form">
+      <input id="register-username" type="text" placeholder="Gebruikersnaam" required />
+      <input id="register-password" type="password" placeholder="Wachtwoord" required />
+      <input id="register-password2" type="password" placeholder="Herhaal wachtwoord" required />
+      <button class="submit" type="submit">Account aanmaken</button>
+    </form>
   </div>
 
-  <!-- Login Form -->
-  <form id="login-form" class="active">
-    <input id="login-username" type="text" placeholder="Gebruikersnaam" required />
-    <input id="login-password" type="password" placeholder="Wachtwoord" required />
-    <button class="submit" type="submit">Inloggen</button>
-  </form>
-
-  <!-- Registratie Form -->
-  <form id="register-form">
-    <input id="register-username" type="text" placeholder="Gebruikersnaam" required />
-    <input id="register-password" type="password" placeholder="Wachtwoord" required />
-    <input id="register-password2" type="password" placeholder="Herhaal wachtwoord" required />
-    <button class="submit" type="submit">Account aanmaken</button>
-  </form>
-</div>
-<script src="assets/js/login.js"></script>
+  <!-- Koppel extern JS-bestand -->
+  <script src="login.js"></script>
 </body>
 </html>
