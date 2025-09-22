@@ -6,6 +6,27 @@
   <title>EpicQrizzz - 1v1 Quiz</title>
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* Custom roze kleur uit de afbeelding */
+    :root {
+      --bs-primary: #E72B76; /* Roze */
+    }
+
+    .btn-primary {
+      background-color: var(--bs-primary) !important;
+      border-color: var(--bs-primary) !important;
+    }
+
+    .btn-primary:hover {
+      background-color: #c91d65 !important; /* iets donkerder roze */
+      border-color: #c91d65 !important;
+    }
+
+    .text-primary {
+      color: var(--bs-primary) !important;
+    }
+  </style>
 </head>
 <body class="bg-light">
   <div class="container py-5">
@@ -13,7 +34,7 @@
       <!-- Speler -->
       <div class="col-md-3">
         <div class="display-1" id="player-avatar">🙂</div>
-        <p id="player-name">Jij</p>
+        <p id="player-name" class="fw-bold text-primary">Jij</p>
         <p class="fw-bold">Score: <span id="player-score">0</span></p>
       </div>
 
@@ -21,8 +42,10 @@
       <div class="col-md-6">
         <div class="card p-4 shadow">
           <div class="h5 text-end" id="timer">30s</div>
-          <div class="h4 mb-3" id="quiz-question">Vraag wordt geladen...</div>
-          <div id="answer-options" class="d-grid gap-2"></div>
+          <div class="h4 mb-3 text-primary" id="quiz-question">Vraag wordt geladen...</div>
+          <div id="answer-options" class="d-grid gap-2">
+            <!-- Antwoord knoppen komen via play.js -->
+          </div>
           <button class="btn btn-secondary mt-3" id="back-btn">Terug naar Home</button>
         </div>
       </div>
@@ -30,7 +53,7 @@
       <!-- Tegenstander -->
       <div class="col-md-3">
         <div class="display-1" id="opponent-avatar">😎</div>
-        <p id="opponent-name">Tegenstander</p>
+        <p id="opponent-name" class="fw-bold text-primary">Tegenstander</p>
         <p class="fw-bold">Score: <span id="opponent-score">0</span></p>
       </div>
     </div>
