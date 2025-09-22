@@ -1,12 +1,54 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\lldj0\\Desktop\\school progmeeren\\Projecten\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{799F4CDA-4155-4954-84D5-945E5B7B296B}|EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest.csproj|c:\\users\\edimz\\desktop\\programmeren-en-school\\scool-projects\\fase-3\\epicqrizzz\\rest\\epicqrizzz.users.rest\\epicqrizzz.users.rest\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{799F4CDA-4155-4954-84D5-945E5B7B296B}|EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest.csproj|solutionrelative:epicqrizzz.users.rest\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{799F4CDA-4155-4954-84D5-945E5B7B296B}|EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest.csproj|c:\\users\\edimz\\desktop\\programmeren-en-school\\scool-projects\\fase-3\\epicqrizzz\\rest\\epicqrizzz.users.rest\\epicqrizzz.users.rest\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{799F4CDA-4155-4954-84D5-945E5B7B296B}|EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest.csproj|solutionrelative:epicqrizzz.users.rest\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest\\Program.cs",
+              "RelativeDocumentMoniker": "EpicQrizzz.Users.Rest\\Program.cs",
+              "ToolTip": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest\\Program.cs",
+              "RelativeToolTip": "EpicQrizzz.Users.Rest\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-22T11:10:37.41Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "EpicQrizzz.Users.Rest\\Controllers\\UserController.cs",
+              "ToolTip": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Users.Rest\\EpicQrizzz.Users.Rest\\Controllers\\UserController.cs",
+              "RelativeToolTip": "EpicQrizzz.Users.Rest\\Controllers\\UserController.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABYAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-18T08:06:21.509Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
