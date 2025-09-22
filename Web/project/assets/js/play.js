@@ -41,7 +41,7 @@ function startTimer(callback) {
 
 async function showQuestion(id) {
   try {
-    const res = await fetch(`http://joost.assenbergh.nl:5291/api/Quetion/GetById/${id}`);
+    const res = await fetch(`http://joost.assenbergh.nl:5291/api/quetion/GetById/${id}`);
     if (!res.ok) throw new Error("Netwerkfout");
     const q = await res.json();
 
@@ -68,7 +68,8 @@ async function showQuestion(id) {
       btn.addEventListener('click', async () => {
         clearInterval(gameData.timerInterval);
         try {
-          const checkRes = await fetch(`http://joost.assenbergh.nl:5291/api/Quetion/CheckAwnser/${id}/${opt.id}`);
+          console.log(id, opt.id);
+          const checkRes = await fetch(`http://joost.assenbergh.nl:5291/api/quetion/CheckAnswer/${id}/${opt.id}`);
           if (!checkRes.ok) throw new Error("Netwerkfout bij checkAnswer");
           const isCorrect = await checkRes.json();
 
