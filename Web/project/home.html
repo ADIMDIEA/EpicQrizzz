@@ -15,21 +15,18 @@
 <body class="d-flex flex-column align-items-center justify-content-center vh-100 bg-light">
   <div class="text-center">
     <h1 class="mb-4">Welkom bij <span class="text-primary">EpicQrizzz</span> <span id="avatar-display">🙂</span></h1>
+    
     <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='play.html'">Spelen</button>
     <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='profile.html'">Profiel</button>
     <button class="btn btn-primary w-100 mb-2" onclick="window.location.href='store.html'">Store</button>
+    
+    <!-- Alleen zichtbaar voor admin -->
+    <button class="btn btn-warning w-100 mb-2 d-none" id="admin-btn" onclick="window.location.href='admin.html'">Admin Panel</button>
+    
     <button class="btn btn-danger w-100" id="logout-btn">Uitloggen</button>
   </div>
 
-  <script>
-    const avatarDisplay = document.getElementById('avatar-display');
-    const savedAvatar = localStorage.getItem('epicqrizzz-avatar');
-    if (savedAvatar) avatarDisplay.textContent = savedAvatar;
-
-    document.getElementById("logout-btn").addEventListener("click", () => {
-      localStorage.removeItem("epicqrizzz-avatar");
-      window.location.href = "login.html";
-    });
-  </script>
+  <script src="home.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
