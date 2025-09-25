@@ -19,6 +19,28 @@ async function hashPassword(password) {
   return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
+// Helper om meldingen te tonen
+function showMessage(message, type = "danger", autoHide = false) {
+  const messageBox = document.getElementById("register-message");
+  messageBox.innerHTML = `
+    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+      ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Sluiten"></button>
+    </div>
+  `;
+
+  if (autoHide) {
+    setTimeout(() => {
+      const alertEl = messageBox.querySelector(".alert");
+      if (alertEl) {
+        alertEl.classList.remove("show");
+        alertEl.classList.add("fade");
+        setTimeout(() => (messageBox.innerHTML = ""), 500);
+      }
+    }, 3000);
+  }
+}
+
 // Register
 const registerForm = document.getElementById("register-form");
 registerForm.addEventListener("submit", async (e) => {
@@ -27,8 +49,17 @@ registerForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("register-password").value;
   const password2 = document.getElementById("register-password2").value;
 
+  // Validatie
+  if (username.trim() === "") {
+    showMessage("Gebruikersnaam mag niet leeg zijn!");
+    return;
+  }
+  if (password.length < 6) {
+    showMessage("Wachtwoord moet minstens 6 tekens lang zijn!");
+    return;
+  }
   if (password !== password2) {
-    alert("Wachtwoorden komen niet overeen!");
+    showMessage("Wachtwoorden komen niet overeen!");
     return;
   }
 
@@ -43,13 +74,16 @@ registerForm.addEventListener("submit", async (e) => {
     });
 
     if (res.ok) {
-      alert("Account aangemaakt! Je kunt nu inloggen.");
-      window.location.href = "login.html";
+      showMessage("✅ Account succesvol aangemaakt! Je wordt doorgestuurd naar de loginpagina...", "success", true);
+
+      setTimeout(() => {
+        window.location.href = "login.html";
+      }, 3000);
     } else {
-      alert("Registratie mislukt: " + res.statusText);
+      showMessage("Registratie mislukt: " + res.statusText);
     }
   } catch (err) {
     console.error(err);
-    alert("Er ging iets mis met registreren");
+    showMessage("Er ging iets mis met registreren");
   }
 });

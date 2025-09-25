@@ -28,7 +28,7 @@ loginForm.addEventListener("submit", async (e) => {
       const data = await res.json();
       localStorage.setItem("epicqrizzz-userId", data.id);
       localStorage.setItem("epicqrizzz-username", username);
-      alert("Welkom " + username + "! Je account-ID is: " + data.id);
+      // Geen alert meer bij succes
       window.location.href = "home.html";
     } else {
       alert("Login mislukt: " + res.statusText);
