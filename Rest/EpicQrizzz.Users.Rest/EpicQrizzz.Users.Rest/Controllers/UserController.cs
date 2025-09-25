@@ -12,7 +12,7 @@ namespace MyBackend.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
+        string connectionString = "Server=localhost;Database=EpicQrizzz;User=root;Password=";
 
 
         [HttpGet("GetAll")]
@@ -26,7 +26,7 @@ namespace MyBackend.Controllers
             {
                 connection.Open();
 
-                string sql = "SELECT uuid, username FROM users";
+                string sql = "SELECT uuid, username, munten FROM users";
                 using var cmd = new MySqlCommand(sql, connection);
                 using var reader = cmd.ExecuteReader();
 
@@ -36,6 +36,7 @@ namespace MyBackend.Controllers
                     {
                         Id = reader["uuid"].ToString(),
                         Name = reader.GetString("username"),
+                        Munten = reader.GetInt32("munten")
                     };
                     users.Add(user);
                 }
@@ -56,7 +57,7 @@ namespace MyBackend.Controllers
                 {
                     connection.Open();
 
-                    string sql = "SELECT username, uuid FROM users WHERE uuid = @id";
+                    string sql = "SELECT username, uuid, munten FROM users WHERE uuid = @id";
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@id", id);
                     using var reader = cmd.ExecuteReader();
@@ -65,6 +66,7 @@ namespace MyBackend.Controllers
 
                     user.Id = reader["uuid"].ToString();
                     user.Name = reader.GetString("username");
+                    user.Munten = reader.GetInt32("munten");
                 }
                 return Ok(user);
             }
@@ -124,7 +126,7 @@ namespace MyBackend.Controllers
                 using var connection = new MySqlConnection(connectionString);
                 {
                     connection.Open();
-                    string sql = "INSERT INTO users (uuid, username, password_hash) VALUES (@uuid, @username, @password_hash)";
+                    string sql = "INSERT INTO users (uuid, username, password_hash, munten) VALUES (@uuid, @username, @password_hash, 10)";
                     using var cmd = new MySqlCommand( sql, connection);
                     cmd.Parameters.AddWithValue("@uuid", user.Id);
                     cmd.Parameters.AddWithValue("@username", user.Name);
@@ -134,13 +136,40 @@ namespace MyBackend.Controllers
                     reader.Read();
 
                 }
-                return CreatedAtAction("CreateAccount", "user", new { Id = user.Id, Name = user.Name });
+                return CreatedAtAction("CreateAccount", "user", new { Id = user.Id, Name = user.Name, Munten = 10 });
                     
             }
             catch
             {
                 return NotFound();
             }
+        }
+        [HttpPost("EditCoins/{id}")]
+        public IActionResult EditCoins(string id, int prijs)
+        {
+            try
+            {
+                using var connection = new MySqlConnection(connectionString);
+                {
+                    connection.Open();
+                    string sql = @"UPDATE users
+                           SET munten = munten + @prijs
+                           WHERE uuid = @uuid";
+                    using var cmd = new MySqlCommand(sql, connection);
+                    cmd.Parameters.AddWithValue("@uuid", id);
+                    cmd.Parameters.AddWithValue("@prijs", prijs);
+                    using var reader = cmd.ExecuteReader();
+
+                    reader.Read();
+
+                    return Ok();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound();
+            }
+            
         }
     }
 }
