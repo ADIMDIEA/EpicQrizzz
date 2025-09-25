@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using EpicQrizzz.Game.Rest.Models;
 using System.Reflection.PortableExecutable;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 
 
@@ -54,7 +55,7 @@ namespace MyBackend.Controllers
         }
 
         [HttpGet("GetRoom/{room}")]
-        public IActionResult GetRoom(string room)
+        public async Task<IActionResult> GetRoom(string room)
         {
             try
             {
@@ -72,10 +73,15 @@ namespace MyBackend.Controllers
 
                     while (reader.Read())
                     {
+                        var userId = reader.GetGuid("user_id").ToString();
+
+                        // Fetch username from your API
+                        string username = await GetUsernameById(userId);
+
                         var game = new GameModel
                         {
                             Room = reader.GetString("room"),
-                            UserId = reader.GetGuid("user_id").ToString(),
+                            UserId = username, // now we use username instead of id
                             Score = reader.GetInt32("score").ToString()
                         };
                         games.Add(game);
@@ -95,6 +101,31 @@ namespace MyBackend.Controllers
                 return StatusCode(500, "An error occurred.");
             }
         }
+
+        // Helper method to call the API and get username
+        private async Task<string> GetUsernameById(string userId)
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"http://joost.assenbergh.nl:5292/api/user/GetById/{userId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var user = JsonSerializer.Deserialize<UserModel>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+                return user?.Name ?? "Unknown";
+            }
+            return "Unknown";
+        }
+
+        // Model for the user API response
+        public class UserModel
+        {
+            public string Id { get; set; }
+            public string Name { get; set; }
+        }
+
 
 
         [HttpGet("GetById/{user_id}")]
