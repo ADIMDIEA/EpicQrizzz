@@ -21,7 +21,6 @@
   <div id="join-screen" class="text-center mb-5">
     <h2>Join Room</h2>
     <input id="room-input" placeholder="Room code (bv. ABCD)" class="form-control mb-2 w-50 mx-auto">
-    <input id="uuid-input" placeholder="Je UUID (optioneel)" class="form-control mb-2 w-50 mx-auto">
     <button id="join-btn" class="btn btn-primary">Join Room</button>
   </div>
 
@@ -60,14 +59,6 @@
 <script>
 const rooms = {};
 
-function generateUUID() {
-  return 'xxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-
 // Fetch real name from API by UUID
 async function getRealName(uuid) {
   try {
@@ -104,11 +95,10 @@ const gameData = {
 
 document.getElementById('join-btn').addEventListener('click', async () => {
   const roomCode = document.getElementById('room-input').value || 'ABCD';
-  let uuid = document.getElementById('uuid-input').value || generateUUID();
 
   if (!rooms[roomCode]) rooms[roomCode] = [];
 
-  const player = { uuid, score: 0, avatar: '🙂', name: await getRealName(uuid) };
+  const player = { uuid, score: 0, avatar: '🙂', name: await getRealName(sessionStorage.getItem("epicqrizzz-userId")) };
   rooms[roomCode].push(player);
 
   // Fetch random names for 9 opponents
