@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EpicQrizzz - Quiz Room</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root { --bs-primary: #E72B76; }
+    .btn-primary { background-color: var(--bs-primary) !important; border-color: var(--bs-primary) !important; }
+    .btn-primary:hover { background-color: #c91d65 !important; border-color: #c91d65 !important; }
+    .text-primary { color: var(--bs-primary) !important; }
+    .player { border: 1px solid #ccc; padding: 5px; margin: 5px 0; border-radius: 5px; }
+  </style>
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+
+  <!-- Join Room Screen -->
+  <div id="join-screen" class="text-center mb-5">
+    <h2>Join Room</h2>
+    <input id="room-input" placeholder="Room code (bv. ABCD)" class="form-control mb-2 w-50 mx-auto">
+    <input id="uuid-input" placeholder="Je UUID (optioneel)" class="form-control mb-2 w-50 mx-auto">
+    <button id="join-btn" class="btn btn-primary">Join Room</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game-screen" style="display:none;">
+    <h3 class="text-center">Room: <span id="room-name"></span></h3>
+
+    <div class="row">
+      <!-- Players List -->
+      <div class="col-md-3">
+        <h5>Leaderboard</h5>
+        <div id="room-players" style="max-height: 600px; overflow-y: auto;"></div>
+      </div>
+
+      <!-- Quiz Section -->
+      <div class="col-md-6">
+        <div class="card p-4 shadow">
+          <div class="h5 text-end" id="timer">30s</div>
+          <div class="h4 mb-3 text-primary" id="quiz-question">Vraag wordt geladen...</div>
+          <div id="answer-options" class="d-grid gap-2"></div>
+          <button class="btn btn-secondary mt-3" id="back-btn">Terug naar Home</button>
+        </div>
+      </div>
+
+      <!-- Main Player -->
+      <div class="col-md-3 text-center">
+        <div class="display-1" id="player-avatar">🙂</div>
+        <p id="player-name" class="fw-bold text-primary">Jij</p>
+        <p class="fw-bold">Score: <span id="player-score">0</span></p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const rooms = {};
+
+function generateUUID() {
+  return 'xxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+// Fetch real name from API by UUID
+async function getRealName(uuid) {
+  try {
+    const res = await fetch(`http://joost.assenbergh.nl:5292/api/user/GetById/${uuid}`);
+    if (!res.ok) return "Speler";
+    const data = await res.json();
+    return data.name || "Speler";
+  } catch {
+    return "Speler";
+  }
+}
+
+// Fetch all users for random opponent names
+async function getRandomOpponentNames(count) {
+  try {
+    const res = await fetch('http://joost.assenbergh.nl:5292/api/user/GetAll');
+    const data = await res.json();
+    const shuffled = data.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count).map(u => u.name);
+  } catch {
+    return Array(count).fill("Speler");
+  }
+}
+
+const gameData = {
+  room: null,
+  player: null,
+  opponents: [],
+  currentQuestion: 1,
+  totalQuestions: 10,
+  timePerQuestion: 30,
+  timerInterval: null
+};
+
+document.getElementById('join-btn').addEventListener('click', async () => {
+  const roomCode = document.getElementById('room-input').value || 'ABCD';
+  let uuid = document.getElementById('uuid-input').value || generateUUID();
+
+  if (!rooms[roomCode]) rooms[roomCode] = [];
+
+  const player = { uuid, score: 0, avatar: '🙂', name: await getRealName(uuid) };
+  rooms[roomCode].push(player);
+
+  // Fetch random names for 9 opponents
+  const oppNames = await getRandomOpponentNames(4);
+  const opponents = oppNames.map(name => ({
+    uuid: generateUUID(),
+    score: 0,
+    avatar: '😎',
+    name
+  }));
+
+  rooms[roomCode].push(...opponents);
+
+  gameData.room = roomCode;
+  gameData.player = player;
+  gameData.opponents = opponents;
+
+  document.getElementById('room-name').textContent = roomCode;
+  document.getElementById('join-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'block';
+
+  updatePlayersUI();
+  showQuestion(gameData.currentQuestion);
+});
+
+async function updatePlayersUI() {
+  const container = document.getElementById('room-players');
+  container.innerHTML = '';
+  for (const p of rooms[gameData.room]) {
+    const div = document.createElement('div');
+    div.className = 'player';
+    div.textContent = `${p.name} - Score: ${p.score}`;
+    container.appendChild(div);
+  }
+
+  document.getElementById('player-avatar').textContent = gameData.player.avatar;
+  document.getElementById('player-name').textContent = gameData.player.name;
+  document.getElementById('player-score').textContent = gameData.player.score;
+}
+
+function startTimer(callback) {
+  let timeLeft = gameData.timePerQuestion;
+  document.getElementById('timer').textContent = timeLeft + 's';
+  clearInterval(gameData.timerInterval);
+  gameData.timerInterval = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').textContent = timeLeft + 's';
+    if (timeLeft <= 0) {
+      clearInterval(gameData.timerInterval);
+      const randOpp = gameData.opponents[Math.floor(Math.random() * gameData.opponents.length)];
+      randOpp.score++;
+      updatePlayersUI();
+      nextQuestion();
+    }
+  }, 1000);
+}
+
+async function showQuestion(id) {
+  try {
+    const res = await fetch(`http://joost.assenbergh.nl:5291/api/quetion/GetById/${id}`);
+    if (!res.ok) throw new Error('Kon vraag niet ophalen');
+    const q = await res.json();
+
+    document.getElementById('quiz-question').textContent = q.questionText;
+    const answerContainer = document.getElementById('answer-options');
+    answerContainer.innerHTML = '';
+
+    startTimer(() => {
+      const randOpp = gameData.opponents[Math.floor(Math.random() * gameData.opponents.length)];
+      randOpp.score++;
+      updatePlayersUI();
+      nextQuestion();
+    });
+
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-primary';
+      btn.textContent = opt.awnserText;
+      btn.addEventListener('click', () => {
+        clearInterval(gameData.timerInterval);
+        const playerCorrect = Math.random() < 0.5;
+        if (playerCorrect) gameData.player.score++;
+        else {
+          const randOpp = gameData.opponents[Math.floor(Math.random() * gameData.opponents.length)];
+          randOpp.score++;
+        }
+        // Random punten voor tegenstanders
+        gameData.opponents.forEach(opp => {
+          if (Math.random() < 0.5) opp.score++;
+        });
+
+        updatePlayersUI();
+        nextQuestion();
+      });
+      answerContainer.appendChild(btn);
+    });
+  } catch(e) {
+    document.getElementById('quiz-question').textContent = 'Kon vraag niet laden.';
+    console.error(e);
+  }
+}
+
+function nextQuestion() {
+  gameData.currentQuestion++;
+  const allPlayers = [gameData.player, ...gameData.opponents];
+  if (gameData.currentQuestion > gameData.totalQuestions || allPlayers.some(p => p.score >= 10)) {
+    endGame();
+  } else {
+    showQuestion(gameData.currentQuestion);
+  }
+}
+
+function endGame() {
+  clearInterval(gameData.timerInterval);
+  const allPlayers = [gameData.player, ...gameData.opponents];
+  allPlayers.sort((a,b)=>b.score-a.score);
+  alert(`Einde spel! Winnaar: ${allPlayers[0].name} 🏆`);
+  window.location.reload();
+}
+
+document.getElementById('back-btn').addEventListener('click', () => {
+  if(confirm('Weet je zeker dat je wilt stoppen?')) window.location.reload();
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
