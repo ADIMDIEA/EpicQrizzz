@@ -33,7 +33,7 @@ namespace MyBackend.Controllers
 
                 // Call EditCoins API asynchronously
                 using var httpClient = new HttpClient();
-                string url = $"http://joost.assenbergh.nl:5291/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
+                string url = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
                 var res = await httpClient.PostAsync(url, null);
 
                 if (!res.IsSuccessStatusCode)
