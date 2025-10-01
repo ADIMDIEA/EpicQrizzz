@@ -135,9 +135,11 @@ namespace MyBackend.Controllers
                 return CreatedAtAction("CreateAccount", "user", new { Id = user.Id, Name = user.Name, Munten = 10 });
                     
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.ToString());
                 return NotFound();
+
             }
         }
         [HttpPost("EditCoins/{id}")]
