@@ -1,18 +1,15 @@
 using EpicQrizzz.Users.Rest;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
-using System.Text;
-using System.Security.Cryptography;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using Microsoft.AspNetCore.Authorization;
+using System;
+using System.IO;
 namespace MyBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=EpicQrizzz;User=root;Password=";
+        string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
 
 
         [HttpGet("GetAll")]
@@ -26,7 +23,7 @@ namespace MyBackend.Controllers
             {
                 connection.Open();
 
-                string sql = "SELECT uuid, username, munten FROM users";
+                string sql = "SELECT username, munten FROM users";
                 using var cmd = new MySqlCommand(sql, connection);
                 using var reader = cmd.ExecuteReader();
 
@@ -34,7 +31,6 @@ namespace MyBackend.Controllers
                 {
                     var user = new User
                     {
-                        Id = reader["uuid"].ToString(),
                         Name = reader.GetString("username"),
                         Munten = reader.GetInt32("munten")
                     };
@@ -126,7 +122,7 @@ namespace MyBackend.Controllers
                 using var connection = new MySqlConnection(connectionString);
                 {
                     connection.Open();
-                    string sql = "INSERT INTO users (uuid, username, password_hash, munten) VALUES (@uuid, @username, @password_hash, 10)";
+                    string sql = "INSERT INTO users (uuid, username, password_hash, munten) VALUES (@uuid, @username, @password_hash, 10); INSERT INTO inventory (userid, itemid, equipped) VALUES (@uuid, 1, 1)";
                     using var cmd = new MySqlCommand( sql, connection);
                     cmd.Parameters.AddWithValue("@uuid", user.Id);
                     cmd.Parameters.AddWithValue("@username", user.Name);
@@ -139,16 +135,24 @@ namespace MyBackend.Controllers
                 return CreatedAtAction("CreateAccount", "user", new { Id = user.Id, Name = user.Name, Munten = 10 });
                     
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine("test");
+                Console.WriteLine(ex.Message);
                 return NotFound();
+
             }
         }
         [HttpPost("EditCoins/{id}")]
-        public IActionResult EditCoins(string id, int prijs)
+        public IActionResult EditCoins(string id, int prijs, string password)
         {
             try
             {
+                string serverPassword = Environment.GetEnvironmentVariable("SERVERPASSWORD");
+                if (password != serverPassword)
+                {
+                    return NotFound("You are not authorized");
+                }
                 using var connection = new MySqlConnection(connectionString);
                 {
                     connection.Open();
@@ -170,6 +174,11 @@ namespace MyBackend.Controllers
                 return NotFound();
             }
             
+        }
+        [HttpPost("ChangeAvatar")]
+        public IActionResult ChangeProfile()
+        {
+            return Ok();
         }
     }
 }
