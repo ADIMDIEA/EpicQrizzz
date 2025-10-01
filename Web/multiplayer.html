@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Multiple Choice Question</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .question {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+    .option {
+      margin: 5px 0;
+    }
+    button {
+      margin-top: 15px;
+      padding: 6px 12px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .correct { color: green; font-weight: bold; }
+    .wrong { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div id="quiz"></div>
+  <button onclick="submitAnswer()">Submit</button>
+  <div id="result"></div>
+
+  <script>
+    const userUUID = "505b7755-ba1d-449b-b5e0-1695f19971ee"; // <-- user's UUID
+    let currentQuestionId = null; // store which question we fetched
+
+    async function loadQuestion() {
+      try {
+        // Pick random ID (adjust max depending on your DB)
+        const randomId = Math.floor(Math.random() * 10) + 1;
+        console.log("Fetching question with ID:", randomId);
+
+        const res = await fetch(`http://joost.assenbergh.nl:5291/api/quetion/GetById/${randomId}`);
+        const data = await res.json();
+
+        currentQuestionId = data.id; // remember for check API
+
+        const quizContainer = document.getElementById("quiz");
+        quizContainer.innerHTML = "";
+        document.getElementById("result").innerHTML = "";
+
+        // Add question
+        const q = document.createElement("div");
+        q.className = "question";
+        q.innerText = data.questionText;
+        quizContainer.appendChild(q);
+
+        // Add options
+        data.options.slice(0, 6).forEach(opt => {
+          const label = document.createElement("label");
+          label.className = "option";
+
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = "answer";
+          radio.value = opt.option.toLowerCase(); // like "a1", "a2"
+
+          label.appendChild(radio);
+          label.appendChild(document.createTextNode(" " + opt.awnserText));
+          quizContainer.appendChild(label);
+          quizContainer.appendChild(document.createElement("br"));
+        });
+      } catch (err) {
+        console.error("Error loading question:", err);
+      }
+    }
+
+    async function submitAnswer() {
+      const selected = document.querySelector("input[name='answer']:checked");
+      if (!selected) {
+        alert("Please choose an option!");
+        return;
+      }
+
+      const chosenOption = selected.value; // like "a1"
+      console.log("Selected:", chosenOption);
+
+      try {
+        const res = await fetch(
+          `http://joost.assenbergh.nl:5293/api/Game/CheckGameAnswer/${userUUID}/${currentQuestionId}/${chosenOption}`
+        );
+        const data = await res.json();
+
+        const resultDiv = document.getElementById("result");
+        if (data.isCorrect) {
+          resultDiv.innerHTML = `<p class="correct">✅ Correct!</p>`;
+        } else {
+          resultDiv.innerHTML = `<p class="wrong">❌ Wrong!</p>`;
+        }
+      } catch (err) {
+        console.error("Error checking answer:", err);
+      }
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
