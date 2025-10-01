@@ -40,7 +40,7 @@ namespace MyBackend.Controllers
                 string json = await res.Content.ReadAsStringAsync();
                 int muntjes = JsonDocument.Parse(json).RootElement.GetProperty("munten").GetInt32();
                 Console.WriteLine(muntjes);
-                if (muntjes < 5)
+                if (muntjes > 5)
                 {
                     using var httpClientForEditCoins = new HttpClient();
                     string url2 = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
@@ -52,7 +52,7 @@ namespace MyBackend.Controllers
                         return StatusCode((int)res.StatusCode, "Failed to deduct coins");
                     }
                 }
-                else
+                else 
                 {
                     Console.WriteLine("Je hebt niet genoeg muntjes!");
                     return StatusCode(601);
