@@ -418,6 +418,38 @@ namespace MyBackend.Controllers
             }
         }
 
+        [HttpGet("IsGameStarted/{userId}")]
+        public IActionResult IsGameStarted(string userId)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sql = "SELECT start FROM game WHERE user_id = @user_id";
+                    using (var cmd = new MySqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@user_id", userId);
+                        var result = cmd.ExecuteScalar();
+
+                        if (result == null)
+                            return NotFound("User not found in game table.");
+
+                        bool started = Convert.ToBoolean(result);
+                        return Ok(new { userId, started });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "An error occurred while checking game start status.");
+            }
+        }
+
+
+
         [HttpGet("GetGameQuestion/{userId}")]
         public async Task<IActionResult> GetGameQuestion(string userId)
         {
