@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Multiplayer Room</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-bottom: 10px; }
+    .question { font-size: 1.2em; margin-bottom: 10px; }
+    .option { margin: 5px 0; }
+    button { padding: 6px 12px; margin-top: 10px; cursor: pointer; }
+    .correct { color: green; font-weight: bold; }
+    .wrong { color: red; font-weight: bold; }
+    table { margin-top: 20px; border-collapse: collapse; width: 300px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  </style>
+</head>
+<body>
+  <h2 id="roomInfo">Multiplayer Room</h2>
+
+  <div id="quiz"></div>
+  <button onclick="submitAnswer()">Submit Answer</button>
+  <div id="result"></div>
+  <button onclick="loadQuestion()">Next Question</button>
+
+  <h3>Players in Room</h3>
+  <table id="playersTable">
+    <thead>
+      <tr>
+        <th>Player</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // Read room and userId from query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const room = urlParams.get("room");
+    const userUUID = urlParams.get("user");
+
+    if (!room || !userUUID) {
+      alert("Missing room or user information!");
+    }
+
+    document.getElementById("roomInfo").innerText = `Room: ${room} | User: ${userUUID}`;
+
+    let currentQuestionId = null;
+
+    // Load a random question
+    async function loadQuestion() {
+      try {
+        const randomId = Math.floor(Math.random() * 10) + 1;
+        const res = await fetch(`http://joost.assenbergh.nl:5291/api/quetion/GetById/${randomId}`);
+        const data = await res.json();
+
+        currentQuestionId = data.id;
+
+        const quizContainer = document.getElementById("quiz");
+        quizContainer.innerHTML = "";
+        document.getElementById("result").innerHTML = "";
+
+        const q = document.createElement("div");
+        q.className = "question";
+        q.innerText = data.questionText;
+        quizContainer.appendChild(q);
+
+        data.options.slice(0,6).forEach(opt => {
+          const label = document.createElement("label");
+          label.className = "option";
+
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = "answer";
+          radio.value = opt.option.toLowerCase();
+
+          label.appendChild(radio);
+          label.appendChild(document.createTextNode(" " + opt.awnserText));
+          quizContainer.appendChild(label);
+          quizContainer.appendChild(document.createElement("br"));
+        });
+      } catch (err) {
+        console.error("Error loading question:", err);
+        document.getElementById("quiz").innerText = "Failed to load question.";
+      }
+    }
+
+    // Submit answer
+    async function submitAnswer() {
+      const selected = document.querySelector("input[name='answer']:checked");
+      if (!selected) {
+        alert("Please select an answer!");
+        return;
+      }
+
+      const chosenOption = selected.value;
+
+      try {
+        const res = await fetch(
+          `http://joost.assenbergh.nl:5293/api/Game/CheckGameAnswer/${userUUID}/${currentQuestionId}/${chosenOption}`
+        );
+        const data = await res.json();
+
+        const resultDiv = document.getElementById("result");
+        if (data.isCorrect) {
+          resultDiv.innerHTML = `<p class="correct">✅ Correct!</p>`;
+        } else {
+          resultDiv.innerHTML = `<p class="wrong">❌ Wrong!</p>`;
+        }
+
+        // Update players after submitting
+        updatePlayers();
+      } catch (err) {
+        console.error("Error checking answer:", err);
+        document.getElementById("result").innerHTML = `<p class="wrong">❌ Failed to check answer</p>`;
+      }
+    }
+
+    // Fetch players in room
+    async function updatePlayers() {
+      try {
+        const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetRoom/${room}`);
+        const players = await res.json();
+
+        const tbody = document.querySelector("#playersTable tbody");
+        tbody.innerHTML = ""; // clear existing
+
+        players.forEach(p => {
+          const row = document.createElement("tr");
+          const userCell = document.createElement("td");
+          userCell.innerText = p.userId;
+          const scoreCell = document.createElement("td");
+          scoreCell.innerText = p.score;
+          row.appendChild(userCell);
+          row.appendChild(scoreCell);
+          tbody.appendChild(row);
+        });
+      } catch (err) {
+        console.error("Error fetching players:", err);
+      }
+    }
+
+    // Auto-refresh players every 5 seconds
+    setInterval(updatePlayers, 5000);
+
+    // Load initial question and players
+    loadQuestion();
+    updatePlayers();
+  </script>
+</body>
+</html>
