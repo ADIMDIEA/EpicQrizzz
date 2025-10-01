@@ -7,7 +7,7 @@ namespace MyBackend.Controllers
     [Route("api/[controller]")]
     public class StoreController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=EpicQrizzz;User=root;Password=";
+        string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
 
         [HttpPost("BuyPack/{packid}/{userid}")]
         public async Task<IActionResult> BuyPack(int packid, string userid)
