@@ -530,6 +530,107 @@ namespace MyBackend.Controllers
             }
         }
 
+        [HttpGet("EndGame/{userId}")]
+        public async Task<IActionResult> EndGame(string userId)
+        {
+            try
+            {
+                using var connection = new MySqlConnection(connectionString);
+                connection.Open();
+
+                // 1. Get the user's room
+                string getRoomSql = "SELECT room FROM game WHERE user_id = @user_id";
+                string room = null;
+                using (var cmd = new MySqlCommand(getRoomSql, connection))
+                {
+                    cmd.Parameters.AddWithValue("@user_id", userId);
+                    room = cmd.ExecuteScalar()?.ToString();
+                }
+
+                if (room == null)
+                    return NotFound("User not found in any game.");
+
+                // 2. Check if everyone in the room has reached question 10
+                string checkFinishedSql = "SELECT COUNT(*) FROM game WHERE room = @room AND question < 10";
+                int unfinishedCount = 0;
+                using (var cmd = new MySqlCommand(checkFinishedSql, connection))
+                {
+                    cmd.Parameters.AddWithValue("@room", room);
+                    unfinishedCount = Convert.ToInt32(cmd.ExecuteScalar());
+                }
+
+                if (unfinishedCount > 0)
+                {
+                    return Ok(new { message = "Not everyone has finished the game yet." });
+                }
+
+                // 3. Get the top 3 players by score
+                string topPlayersSql = @"SELECT user_id, score FROM game 
+                                 WHERE room = @room 
+                                 ORDER BY score DESC 
+                                 LIMIT 3";
+                var topPlayers = new List<(string userId, int score)>();
+                using (var cmd = new MySqlCommand(topPlayersSql, connection))
+                {
+                    cmd.Parameters.AddWithValue("@room", room);
+                    using var reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        topPlayers.Add((reader["user_id"].ToString(), Convert.ToInt32(reader["score"])));
+                    }
+                }
+
+                if (topPlayers.Count == 0)
+                    return BadRequest("No players found in this room.");
+
+                string topWinnerId = topPlayers[0].userId;
+
+                // 4. Give coins to the top winner if the caller is the top winner
+                if (userId == topWinnerId)
+                {
+                    try
+                    {
+                        using var httpClientForEditCoins = new HttpClient();
+                        string serverPassword = "YOUR_SERVER_PASSWORD"; // Replace with your actual server password
+                        string url = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{topWinnerId}?prijs=10&password={serverPassword}";
+                        var response = await httpClientForEditCoins.PostAsync(url, null);
+                        response.EnsureSuccessStatusCode();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Failed to give coins: " + ex.Message);
+                    }
+
+                    // 5. Delete the room and its questions
+                    string deleteRoomSql = "DELETE FROM game WHERE room = @room";
+                    using (var cmd = new MySqlCommand(deleteRoomSql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@room", room);
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    string deleteQuestionsSql = "DELETE FROM room_questions WHERE room = @room";
+                    using (var cmd = new MySqlCommand(deleteQuestionsSql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@room", room);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                return Ok(new
+                {
+                    top3 = topPlayers.Select(p => new { p.userId, p.score }),
+                    coinsGivenToTopWinner = userId == topWinnerId
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "An error occurred while ending the game.");
+            }
+        }
+
+
 
     }
 }
