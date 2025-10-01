@@ -137,7 +137,8 @@ namespace MyBackend.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine("test");
+                Console.WriteLine(ex.Message);
                 return NotFound();
 
             }
