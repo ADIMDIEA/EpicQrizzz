@@ -9,7 +9,7 @@ namespace MyBackend.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=EpicQrizzz;User=root;Password=";
+        string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
 
 
         [HttpGet("GetAll")]
