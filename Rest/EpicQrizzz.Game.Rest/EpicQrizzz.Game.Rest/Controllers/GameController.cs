@@ -196,8 +196,6 @@ namespace MyBackend.Controllers
             }
         }
 
-
-
         [HttpPost("JoinOrAdd")]
         public IActionResult JoinOrAdd([FromBody] GameModel game)
         {
@@ -215,18 +213,29 @@ namespace MyBackend.Controllers
                         deleteCmd.ExecuteNonQuery();
                     }
 
+                    // Check if the room already exists
+                    string checkRoomSql = "SELECT COUNT(*) FROM game WHERE room = @room";
+                    bool isHost = false;
+                    using (var checkCmd = new MySqlCommand(checkRoomSql, connection))
+                    {
+                        checkCmd.Parameters.AddWithValue("@room", game.Room);
+                        int roomCount = Convert.ToInt32(checkCmd.ExecuteScalar());
+                        isHost = roomCount == 0; // first player becomes host
+                    }
+
                     // Insert the new game (score always starts at 0)
-                    string insertSql = @"INSERT INTO game (room, user_id, score) 
-                                 VALUES (@room, @user_id, 0)";
+                    string insertSql = @"INSERT INTO game (room, user_id, score, host, start) 
+                                 VALUES (@room, @user_id, 0, @host, 0)";
                     using (var insertCmd = new MySqlCommand(insertSql, connection))
                     {
                         insertCmd.Parameters.AddWithValue("@room", game.Room);
                         insertCmd.Parameters.AddWithValue("@user_id", game.UserId);
+                        insertCmd.Parameters.AddWithValue("@host", isHost ? 1 : 0);
 
                         int rowsAffected = insertCmd.ExecuteNonQuery();
 
                         if (rowsAffected > 0)
-                            return Ok("Joined or created game successfully with score 0.");
+                            return Ok(new { message = "Joined or created game successfully with score 0.", host = isHost });
                         else
                             return BadRequest("Failed to join or create game.");
                     }
@@ -238,7 +247,6 @@ namespace MyBackend.Controllers
                 return StatusCode(500, "An error occurred.");
             }
         }
-
 
         [HttpGet("CheckGameAnswer/{userId}/{questionId}/{answer}")]
         public async Task<IActionResult> CheckGameAnswer(string userId, int questionId, string answer)
@@ -290,6 +298,59 @@ namespace MyBackend.Controllers
             }
         }
 
+        [HttpPost("StartGame")]
+        public IActionResult StartGame([FromBody] Guid userId)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // 1. Get the room and check if the user is the host
+                    string checkHostSql = "SELECT room, host FROM game WHERE user_id = @user_id";
+                    string room = null;
+                    bool isHost = false;
+
+                    using (var cmd = new MySqlCommand(checkHostSql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@user_id", userId);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                room = reader["room"].ToString();
+                                isHost = Convert.ToBoolean(reader["host"]);
+                            }
+                            else
+                            {
+                                return BadRequest("User not found in any game.");
+                            }
+                        }
+                    }
+
+                    if (!isHost)
+                    {
+                        return BadRequest("Only the host can start the game.");
+                    }
+
+                    // 2. Set start = true for all players in the same room
+                    string updateStartSql = "UPDATE game SET start = 1 WHERE room = @room";
+                    using (var updateCmd = new MySqlCommand(updateStartSql, connection))
+                    {
+                        updateCmd.Parameters.AddWithValue("@room", room);
+                        int rowsAffected = updateCmd.ExecuteNonQuery();
+
+                        return Ok(new { message = $"Game started for {rowsAffected} player(s) in room {room}." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "An error occurred.");
+            }
+        }
 
 
 
