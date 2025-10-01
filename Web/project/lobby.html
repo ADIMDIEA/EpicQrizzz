@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Lobby</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-bottom: 10px; }
+    button { padding: 8px 12px; margin-top: 10px; cursor: pointer; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 5px 0; }
+    #status { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2 id="roomInfo">Lobby</h2>
+
+  <h3>Players in this room:</h3>
+  <ul id="playersList"></ul>
+
+  <button id="startBtn">Start Game</button>
+  <div id="status"></div>
+
+  <script>
+    // Read room and user from query string
+    const urlParams = new URLSearchParams(window.location.search);
+    const room = urlParams.get("room");
+    const userUUID = urlParams.get("user"); // this is the GUID used to start the game
+
+    if (!room || !userUUID) {
+      alert("Missing room or user info!");
+    }
+
+    document.getElementById("roomInfo").innerText = `Lobby - Room: ${room}`;
+
+    // Fetch all players in the room (without scores)
+    async function updatePlayers() {
+      try {
+        const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetRoom/${room}`);
+        const players = await res.json();
+
+        const list = document.getElementById("playersList");
+        list.innerHTML = "";
+        players.forEach(p => {
+          const li = document.createElement("li");
+          li.innerText = p.userId; // only show username
+          list.appendChild(li);
+        });
+      } catch (err) {
+        console.error("Error fetching players:", err);
+      }
+    }
+
+    // Start game button
+    async function startGame() {
+      try {
+        const res = await fetch("http://joost.assenbergh.nl:5293/api/Game/StartGame", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(userUUID) // send GUID, not room
+        });
+
+        const responseText = await res.text(); // StartGame returns plain text
+        console.log("StartGame response:", responseText);
+
+        if (responseText.toLowerCase().includes("started")) {
+          // Game started → redirect
+          window.location.href = `multiplayer2.html?room=${room}&user=${userUUID}`;
+        } else {
+          document.getElementById("status").innerText = `❌ ${responseText}`;
+        }
+      } catch (err) {
+        console.error("Error starting game:", err);
+        document.getElementById("status").innerText = "❌ Failed to start game";
+      }
+    }
+
+    document.getElementById("startBtn").addEventListener("click", startGame);
+
+    // Refresh players every 5 seconds
+    setInterval(updatePlayers, 5000);
+
+    // Initial load
+    updatePlayers();
+  </script>
+</body>
+</html>
