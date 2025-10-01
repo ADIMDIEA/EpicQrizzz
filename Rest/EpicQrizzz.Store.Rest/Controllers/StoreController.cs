@@ -38,7 +38,7 @@ namespace MyBackend.Controllers
                 var res = await httpClient.GetAsync(url);
                 res.EnsureSuccessStatusCode();
                 string json = await res.Content.ReadAsStringAsync();
-                if (JsonDocument.Parse(json).RootElement.GetProperty("munten").GetInt32() > 5)
+                if (JsonDocument.Parse(json).RootElement.GetProperty("munten").GetInt32() >= 5)
                 {
                     using var httpClientForEditCoins = new HttpClient();
                     string url2 = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
