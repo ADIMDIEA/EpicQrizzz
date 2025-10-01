@@ -32,8 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const responseText = await res.text();
       console.log("Room response:", responseText);
 
-      // Doorsturen naar multiplayer2.html
-      window.location.href = `multiplayer2.html?room=${room}&user=${userUUID}`;
+      // ✅ Redirect to lobby.html instead of multiplayer2.html
+      window.location.href = `lobby.html?room=${room}&user=${userUUID}`;
     } catch (err) {
       console.error("Error joining room:", err);
       statusDiv.innerHTML = `<span style="color:red">❌ Failed to join room</span>`;

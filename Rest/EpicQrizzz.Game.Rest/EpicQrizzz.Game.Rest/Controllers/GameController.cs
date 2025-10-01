@@ -274,7 +274,6 @@ namespace MyBackend.Controllers
         }
 
 
-
         [HttpGet("CheckGameAnswer/{userId}/{questionId}/{answer}")]
         public async Task<IActionResult> CheckGameAnswer(string userId, int questionId, string answer)
         {
@@ -285,67 +284,76 @@ namespace MyBackend.Controllers
                     connection.Open();
 
                     // Check if the user exists and if their room has started
-                    string checkSql = @"SELECT g.start 
+                    string checkSql = @"SELECT g.start, g.question 
                                 FROM game g 
                                 WHERE g.user_id = @user_id";
                     bool roomStarted = false;
+                    int currentQuestionIndex = 0;
 
                     using (var checkCmd = new MySqlCommand(checkSql, connection))
                     {
                         checkCmd.Parameters.AddWithValue("@user_id", userId);
-                        var result = checkCmd.ExecuteScalar();
-
-                        if (result == null)
+                        using (var reader = checkCmd.ExecuteReader())
                         {
-                            return NotFound("User not found in game table.");
+                            if (reader.Read())
+                            {
+                                roomStarted = Convert.ToBoolean(reader["start"]);
+                                currentQuestionIndex = Convert.ToInt32(reader["question"]);
+                            }
+                            else
+                            {
+                                return NotFound("User not found in game table.");
+                            }
                         }
-
-                        roomStarted = Convert.ToBoolean(result);
                     }
 
                     if (!roomStarted)
                     {
                         return BadRequest("The game has not started yet for this room.");
                     }
-                }
 
-                // Only continue if the room has started
-                using (var httpClient = new HttpClient())
-                {
-                    // Call external API
-                    string url = $"http://joost.assenbergh.nl:5291/api/quetion/CheckAnswer/{questionId}/{answer}";
-                    var response = await httpClient.GetAsync(url);
-
-                    if (!response.IsSuccessStatusCode)
-                        return StatusCode((int)response.StatusCode, "External API call failed.");
-
-                    var result = await response.Content.ReadAsStringAsync();
-
-                    if (!bool.TryParse(result, out bool isCorrect))
-                        return BadRequest("Invalid response from external API.");
-
-                    if (isCorrect)
+                    // Call external API to check answer
+                    using (var httpClient = new HttpClient())
                     {
-                        using (var connection = new MySqlConnection(connectionString))
+                        string url = $"http://joost.assenbergh.nl:5291/api/quetion/CheckAnswer/{questionId}/{answer}";
+                        var response = await httpClient.GetAsync(url);
+
+                        if (!response.IsSuccessStatusCode)
+                            return StatusCode((int)response.StatusCode, "External API call failed.");
+
+                        var result = await response.Content.ReadAsStringAsync();
+
+                        if (!bool.TryParse(result, out bool isCorrect))
+                            return BadRequest("Invalid response from external API.");
+
+                        // Increment question index regardless of correctness
+                        string updateQuestionSql = @"UPDATE game SET question = question + 1 WHERE user_id = @user_id";
+                        using (var updateCmd = new MySqlCommand(updateQuestionSql, connection))
                         {
-                            connection.Open();
-
-                            // Increase score by 1 for this user
-                            string sql = @"UPDATE game 
-                                   SET score = score + 1 
-                                   WHERE user_id = @user_id";
-
-                            using var cmd = new MySqlCommand(sql, connection);
-                            cmd.Parameters.AddWithValue("@user_id", userId);
-
-                            int rowsAffected = cmd.ExecuteNonQuery();
-
-                            if (rowsAffected == 0)
-                                return NotFound("User not found in game table.");
+                            updateCmd.Parameters.AddWithValue("@user_id", userId);
+                            updateCmd.ExecuteNonQuery();
                         }
-                    }
 
-                    return Ok(new { userId, questionId, answer, isCorrect });
+                        // Increase score if correct
+                        if (isCorrect)
+                        {
+                            string updateScoreSql = @"UPDATE game SET score = score + 1 WHERE user_id = @user_id";
+                            using (var updateScoreCmd = new MySqlCommand(updateScoreSql, connection))
+                            {
+                                updateScoreCmd.Parameters.AddWithValue("@user_id", userId);
+                                updateScoreCmd.ExecuteNonQuery();
+                            }
+                        }
+
+                        return Ok(new
+                        {
+                            userId,
+                            questionId,
+                            answer,
+                            isCorrect,
+                            nextQuestionIndex = currentQuestionIndex + 1
+                        });
+                    }
                 }
             }
             catch (Exception ex)
@@ -354,6 +362,7 @@ namespace MyBackend.Controllers
                 return StatusCode(500, "Error calling external API or updating DB.");
             }
         }
+
 
         [HttpPost("StartGame")]
         public IActionResult StartGame([FromBody] Guid userId)
@@ -408,6 +417,38 @@ namespace MyBackend.Controllers
                 return StatusCode(500, "An error occurred.");
             }
         }
+
+        [HttpGet("IsGameStarted/{userId}")]
+        public IActionResult IsGameStarted(string userId)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sql = "SELECT start FROM game WHERE user_id = @user_id";
+                    using (var cmd = new MySqlCommand(sql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@user_id", userId);
+                        var result = cmd.ExecuteScalar();
+
+                        if (result == null)
+                            return NotFound("User not found in game table.");
+
+                        bool started = Convert.ToBoolean(result);
+                        return Ok(new { userId, started });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "An error occurred while checking game start status.");
+            }
+        }
+
+
 
         [HttpGet("GetGameQuestion/{userId}")]
         public async Task<IActionResult> GetGameQuestion(string userId)
@@ -477,15 +518,7 @@ namespace MyBackend.Controllers
 
                         var questionData = await response.Content.ReadAsStringAsync();
 
-                        // 4. Increment user's question index
-                        string updateSql = @"UPDATE game SET question = question + 1 WHERE user_id = @user_id";
-                        using (var updateCmd = new MySqlCommand(updateSql, connection))
-                        {
-                            updateCmd.Parameters.AddWithValue("@user_id", userId);
-                            updateCmd.ExecuteNonQuery();
-                        }
-
-                        // 5. Return the external API JSON directly
+                        // 4. Return the external API JSON directly WITHOUT incrementing
                         return Content(questionData, "application/json");
                     }
                 }
@@ -496,7 +529,6 @@ namespace MyBackend.Controllers
                 return StatusCode(500, "An error occurred while fetching the question.");
             }
         }
-
 
 
     }

@@ -7,7 +7,7 @@ namespace MyBackend.Controllers
     [Route("api/[controller]")]
     public class StoreController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=EpicQrizzz;User=root;Password=";
+        string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
 
         [HttpPost("BuyPack/{packid}/{userid}")]
         public async Task<IActionResult> BuyPack(int packid, string userid)
@@ -33,7 +33,7 @@ namespace MyBackend.Controllers
 
                 // Call EditCoins API asynchronously
                 using var httpClient = new HttpClient();
-                string url = $"http://joost.assenbergh.nl:5291/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
+                string url = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
                 var res = await httpClient.PostAsync(url, null);
 
                 if (!res.IsSuccessStatusCode)

@@ -18,7 +18,7 @@
     }
 
     .btn-primary:hover {
-      background-color: #c91d65 !important; /* donkerder roze */
+      background-color: #c91d65 !important;
       border-color: #c91d65 !important;
     }
 
@@ -27,13 +27,12 @@
     }
 
     body {
-      background-color: #f8f9fa; /* lichte achtergrond */
+      background-color: #f8f9fa;
     }
   </style>
 </head>
 <body>
   <div class="container py-5">
-    <!-- Room Info -->
     <div class="text-center mb-4">
       <h2 id="roomInfo" class="fw-bold text-primary">Multiplayer Room</h2>
     </div>
@@ -46,7 +45,6 @@
           <div id="result" class="mb-3"></div>
           <div class="d-flex gap-2">
             <button class="btn btn-primary" onclick="submitAnswer()">Verstuur antwoord</button>
-            <button class="btn btn-secondary" onclick="loadQuestion()">Volgende vraag</button>
           </div>
         </div>
       </div>
@@ -63,9 +61,7 @@
                   <th>Score</th>
                 </tr>
               </thead>
-              <tbody id="playersTableBody">
-                <!-- spelers komen hier -->
-              </tbody>
+              <tbody id="playersTableBody"></tbody>
             </table>
           </div>
         </div>
@@ -73,9 +69,8 @@
     </div>
   </div>
 
-  <!-- Script -->
   <script>
-    // Read room and userId from query string
+    // Haal room en userGUID uit de URL
     const urlParams = new URLSearchParams(window.location.search);
     const room = urlParams.get("room");
     const userUUID = urlParams.get("user");
@@ -88,13 +83,18 @@
 
     let currentQuestionId = null;
 
-    // Load a random question
+    // Laad de volgende vraag
     async function loadQuestion() {
       try {
-        const randomId = Math.floor(Math.random() * 10) + 1;
-        const res = await fetch(`http://joost.assenbergh.nl:5291/api/quetion/GetById/${randomId}`);
-        const data = await res.json();
+        const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetGameQuestion/${userUUID}`);
 
+        if (res.status === 400) {
+          document.getElementById("quiz").innerHTML = `<p class="text-primary fw-bold">🎉 Je hebt alle vragen beantwoord!</p>`;
+          document.getElementById("result").innerHTML = "";
+          return;
+        }
+
+        const data = await res.json();
         currentQuestionId = data.id;
 
         const quizContainer = document.getElementById("quiz");
@@ -125,11 +125,11 @@
         });
       } catch (err) {
         console.error("Error loading question:", err);
-        document.getElementById("quiz").innerText = "❌ Failed to load question.";
+        document.getElementById("quiz").innerText = "❌ Kon de vraag niet laden.";
       }
     }
 
-    // Submit answer
+    // Verstuur antwoord en laad automatisch volgende vraag
     async function submitAnswer() {
       const selected = document.querySelector("input[name='answer']:checked");
       if (!selected) {
@@ -152,15 +152,21 @@
           resultDiv.innerHTML = `<p class="text-danger fw-bold">❌ Fout!</p>`;
         }
 
-        // Update players after submitting
         updatePlayers();
+
+        // Laad automatisch volgende vraag na 1 seconde
+        setTimeout(() => {
+          resultDiv.innerHTML = ""; // feedback wissen
+          loadQuestion();
+        }, 1000);
+
       } catch (err) {
         console.error("Error checking answer:", err);
         document.getElementById("result").innerHTML = `<p class="text-danger fw-bold">❌ Kon antwoord niet checken</p>`;
       }
     }
 
-    // Fetch players in room
+    // Update spelers in de kamer
     async function updatePlayers() {
       try {
         const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetRoom/${room}`);
@@ -171,10 +177,7 @@
 
         players.forEach(p => {
           const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${p.userId}</td>
-            <td><span class="fw-bold">${p.score}</span></td>
-          `;
+          row.innerHTML = `<td>${p.userId}</td><td><span class="fw-bold">${p.score}</span></td>`;
           tbody.appendChild(row);
         });
       } catch (err) {
@@ -182,7 +185,7 @@
       }
     }
 
-    // Auto-refresh players every 5 sec
+    // Auto-refresh spelerslijst elke 5 seconden
     setInterval(updatePlayers, 5000);
 
     // Initial load
