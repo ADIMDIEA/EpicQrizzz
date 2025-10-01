@@ -4,31 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EpicQrizzz - Multiplayer Room</title>
-  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <style>
-    :root {
-      --bs-primary: #E72B76; /* Roze */
-    }
-
-    .btn-primary {
-      background-color: var(--bs-primary) !important;
-      border-color: var(--bs-primary) !important;
-    }
-
-    .btn-primary:hover {
-      background-color: #c91d65 !important;
-      border-color: #c91d65 !important;
-    }
-
-    .text-primary {
-      color: var(--bs-primary) !important;
-    }
-
-    body {
-      background-color: #f8f9fa;
-    }
+    :root { --bs-primary: #E72B76; }
+    .btn-primary { background-color: var(--bs-primary) !important; border-color: var(--bs-primary) !important; }
+    .btn-primary:hover { background-color: #c91d65 !important; border-color: #c91d65 !important; }
+    .text-primary { color: var(--bs-primary) !important; }
+    body { background-color: #f8f9fa; }
   </style>
 </head>
 <body>
@@ -56,10 +38,7 @@
           <div class="table-responsive">
             <table class="table table-bordered text-center mt-3">
               <thead class="table-light">
-                <tr>
-                  <th>Speler</th>
-                  <th>Score</th>
-                </tr>
+                <tr><th>Speler</th><th>Score</th></tr>
               </thead>
               <tbody id="playersTableBody"></tbody>
             </table>
@@ -70,125 +49,123 @@
   </div>
 
   <script>
-    // Haal room en userGUID uit de URL
     const urlParams = new URLSearchParams(window.location.search);
     const room = urlParams.get("room");
     const userUUID = urlParams.get("user");
 
-    if (!room || !userUUID) {
-      alert("Missing room or user information!");
-    }
-
+    if (!room || !userUUID) alert("Missing room or user info!");
     document.getElementById("roomInfo").innerText = `Room: ${room} | User: ${userUUID}`;
 
     let currentQuestionId = null;
+    let questionTimer = 30;
+    let timerInterval = null;
+    let answeredPlayers = new Set();
 
-    // Laad de volgende vraag
-    async function loadQuestion() {
-      try {
-        const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetGameQuestion/${userUUID}`);
-
-        if (res.status === 400) {
-          document.getElementById("quiz").innerHTML = `<p class="text-primary fw-bold">🎉 Je hebt alle vragen beantwoord!</p>`;
-          document.getElementById("result").innerHTML = "";
-          return;
-        }
-
-        const data = await res.json();
-        currentQuestionId = data.id;
-
-        const quizContainer = document.getElementById("quiz");
-        quizContainer.innerHTML = "";
-
-        const q = document.createElement("div");
-        q.className = "mb-3 fw-bold";
-        q.innerText = data.questionText;
-        quizContainer.appendChild(q);
-
-        data.options.slice(0,6).forEach(opt => {
-          const div = document.createElement("div");
-          div.className = "form-check";
-
-          const radio = document.createElement("input");
-          radio.type = "radio";
-          radio.name = "answer";
-          radio.value = opt.option.toLowerCase();
-          radio.className = "form-check-input";
-
-          const label = document.createElement("label");
-          label.className = "form-check-label";
-          label.innerText = opt.awnserText;
-
-          div.appendChild(radio);
-          div.appendChild(label);
-          quizContainer.appendChild(div);
-        });
-      } catch (err) {
-        console.error("Error loading question:", err);
-        document.getElementById("quiz").innerText = "❌ Kon de vraag niet laden.";
-      }
+    // Fetch spelers in kamer
+    async function fetchRoomPlayers() {
+      const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetRoom/${room}`);
+      return await res.json();
     }
 
-    // Verstuur antwoord en laad automatisch volgende vraag
-    async function submitAnswer() {
-      const selected = document.querySelector("input[name='answer']:checked");
-      if (!selected) {
-        alert("Kies een antwoord!");
-        return;
-      }
-
-      const chosenOption = selected.value;
-
-      try {
-        const res = await fetch(
-          `http://joost.assenbergh.nl:5293/api/Game/CheckGameAnswer/${userUUID}/${currentQuestionId}/${chosenOption}`
-        );
-        const data = await res.json();
-
-        const resultDiv = document.getElementById("result");
-        if (data.isCorrect) {
-          resultDiv.innerHTML = `<p class="text-success fw-bold">✅ Correct!</p>`;
-        } else {
-          resultDiv.innerHTML = `<p class="text-danger fw-bold">❌ Fout!</p>`;
-        }
-
-        updatePlayers();
-
-        // Laad automatisch volgende vraag na 1 seconde
-        setTimeout(() => {
-          resultDiv.innerHTML = ""; // feedback wissen
-          loadQuestion();
-        }, 1000);
-
-      } catch (err) {
-        console.error("Error checking answer:", err);
-        document.getElementById("result").innerHTML = `<p class="text-danger fw-bold">❌ Kon antwoord niet checken</p>`;
-      }
-    }
-
-    // Update spelers in de kamer
     async function updatePlayers() {
       try {
-        const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetRoom/${room}`);
-        const players = await res.json();
-
+        const players = await fetchRoomPlayers();
         const tbody = document.getElementById("playersTableBody");
         tbody.innerHTML = "";
-
         players.forEach(p => {
           const row = document.createElement("tr");
           row.innerHTML = `<td>${p.userId}</td><td><span class="fw-bold">${p.score}</span></td>`;
           tbody.appendChild(row);
         });
-      } catch (err) {
-        console.error("Error fetching players:", err);
-      }
+      } catch (err) { console.error(err); }
     }
 
-    // Auto-refresh spelerslijst elke 5 seconden
-    setInterval(updatePlayers, 5000);
+    // Laad vraag
+    async function loadQuestion() {
+      try {
+        const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetGameQuestion/${userUUID}`);
+        if (res.status === 400) { showPodium(); return; }
 
-    // Initial load
+        const data = await res.json();
+        currentQuestionId = data.id;
+        answeredPlayers.clear();
+
+        const quizContainer = document.getElementById("quiz");
+        quizContainer.innerHTML = `<div class="mb-3 fw-bold">${data.questionText}</div>`;
+        data.options.slice(0,6).forEach(opt => {
+          const div = document.createElement("div");
+          div.className = "form-check";
+          div.innerHTML = `<input class="form-check-input" type="radio" name="answer" value="${opt.option.toLowerCase()}">
+                           <label class="form-check-label">${opt.awnserText}</label>`;
+          quizContainer.appendChild(div);
+        });
+
+        questionTimer = 30;
+        document.getElementById("result").innerHTML = `<p>⏳ Tijd over: ${questionTimer} sec</p>`;
+        clearInterval(timerInterval);
+        timerInterval = setInterval(async () => {
+          questionTimer--;
+          document.getElementById("result").innerHTML = `<p>⏳ Tijd over: ${questionTimer} sec</p>`;
+          if (questionTimer <= 0) { clearInterval(timerInterval); await waitForAllPlayers(); }
+        }, 1000);
+
+      } catch (err) { console.error(err); document.getElementById("quiz").innerText = "❌ Kon de vraag niet laden."; }
+    }
+
+    async function submitAnswer() {
+      const selected = document.querySelector("input[name='answer']:checked");
+      if (!selected) return alert("Kies een antwoord!");
+      const chosenOption = selected.value;
+
+      try {
+        const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/CheckGameAnswer/${userUUID}/${currentQuestionId}/${chosenOption}`);
+        const data = await res.json();
+
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = data.isCorrect
+          ? `<p class="text-success fw-bold">✅ Correct!</p>`
+          : `<p class="text-danger fw-bold">❌ Fout!</p>`;
+
+        answeredPlayers.add(userUUID);
+        const allAnswered = await checkAllAnswered();
+        if (allAnswered) { clearInterval(timerInterval); await waitForAllPlayers(); }
+      } catch (err) { console.error(err); }
+    }
+
+    async function checkAllAnswered() {
+      try {
+        const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/AnsweredPlayers/${currentQuestionId}`);
+        const data = await res.json();
+        return data.length >= (await fetchRoomPlayers()).length;
+      } catch (err) { console.error(err); return false; }
+    }
+
+    async function waitForAllPlayers() {
+      await updatePlayers();
+      setTimeout(loadQuestion, 1000);
+    }
+
+    // Podium en munten verdeling
+    async function showPodium() {
+      try {
+        const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetRoomScores/${room}`);
+        const players = await res.json();
+        players.sort((a,b) => b.score - a.score);
+        const topScore = players[0].score;
+        const winners = players.filter(p => p.score === topScore);
+        const coins = topScore / winners.length;
+
+        const podiumHTML = players.map((p,i) =>
+          `<li>${i+1}. ${p.userId} - ${p.score} pts ${p.score === topScore ? "- " + coins.toFixed(1) + " munten" : ""}</li>`).join("");
+
+        document.body.innerHTML = `<div class="container py-5">
+          <h2 class="text-primary fw-bold text-center">🏆 Podium</h2>
+          <ul class="list-group mt-4">${podiumHTML}</ul>
+        </div>`;
+      } catch (err) { console.error(err); }
+    }
+
+    setInterval(updatePlayers, 5000);
     loadQuestion();
     updatePlayers();
   </script>
