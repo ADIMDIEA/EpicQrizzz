@@ -585,13 +585,16 @@ namespace MyBackend.Controllers
 
                 string topWinnerId = topPlayers[0].userId;
 
-                // 4. Give coins to the top winner if the caller is the top winner
+                // 4. Give coins and delete room/questions if the caller is the top winner
                 if (userId == topWinnerId)
                 {
                     try
                     {
                         using var httpClientForEditCoins = new HttpClient();
-                        string serverPassword = Environment.GetEnvironmentVariable("SERVERPASSWORD"); ; // Replace with your actual server password
+                        string serverPassword = Environment.GetEnvironmentVariable("SERVERPASSWORD");
+                        if (string.IsNullOrEmpty(serverPassword))
+                            return StatusCode(500, "Server password not set in environment variables.");
+
                         string url = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{topWinnerId}?prijs=10&password={serverPassword}";
                         var response = await httpClientForEditCoins.PostAsync(url, null);
                         response.EnsureSuccessStatusCode();
@@ -601,7 +604,7 @@ namespace MyBackend.Controllers
                         Console.WriteLine("Failed to give coins: " + ex.Message);
                     }
 
-                    // 5. Delete the room and its questions
+                    // Delete the room and all associated questions
                     string deleteRoomSql = "DELETE FROM game WHERE room = @room";
                     using (var cmd = new MySqlCommand(deleteRoomSql, connection))
                     {
@@ -617,9 +620,17 @@ namespace MyBackend.Controllers
                     }
                 }
 
+                // 5. Replace UUIDs with usernames for top 3
+                var top3WithNames = new List<object>();
+                foreach (var player in topPlayers)
+                {
+                    string name = await GetUsernameById(player.userId); // Use your existing function
+                    top3WithNames.Add(new { name, score = player.score });
+                }
+
                 return Ok(new
                 {
-                    top3 = topPlayers.Select(p => new { p.userId, p.score }),
+                    top3 = top3WithNames,
                     coinsGivenToTopWinner = userId == topWinnerId
                 });
             }
@@ -629,7 +640,6 @@ namespace MyBackend.Controllers
                 return StatusCode(500, "An error occurred while ending the game.");
             }
         }
-
 
 
     }
