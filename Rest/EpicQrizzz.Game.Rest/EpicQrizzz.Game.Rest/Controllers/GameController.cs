@@ -591,7 +591,7 @@ namespace MyBackend.Controllers
                     try
                     {
                         using var httpClientForEditCoins = new HttpClient();
-                        string serverPassword = "YOUR_SERVER_PASSWORD"; // Replace with your actual server password
+                        string serverPassword = Environment.GetEnvironmentVariable("SERVERPASSWORD"); ; // Replace with your actual server password
                         string url = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{topWinnerId}?prijs=10&password={serverPassword}";
                         var response = await httpClientForEditCoins.PostAsync(url, null);
                         response.EnsureSuccessStatusCode();
