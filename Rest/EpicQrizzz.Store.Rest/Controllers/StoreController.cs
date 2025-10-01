@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 using MySql.Data.MySqlClient;
+using System.Text.Json;
 namespace MyBackend.Controllers
 {
     [ApiController]
@@ -33,14 +34,31 @@ namespace MyBackend.Controllers
 
                 // Call EditCoins API asynchronously
                 using var httpClient = new HttpClient();
-                string url = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
-                var res = await httpClient.PostAsync(url, null);
-
-                if (!res.IsSuccessStatusCode)
+                string url = $"http://joost.assenbergh.nl:5292/api/user/GetById/{userid}";
+                var res = await httpClient.GetAsync(url);
+                res.EnsureSuccessStatusCode();
+                string json = await res.Content.ReadAsStringAsync();
+                int muntjes = JsonDocument.Parse(json).RootElement.GetProperty("munten").GetInt32();
+                Console.WriteLine(muntjes);
+                if (muntjes < 5)
                 {
-                    Console.WriteLine(res);
-                    return StatusCode((int)res.StatusCode, "Failed to deduct coins");
+                    using var httpClientForEditCoins = new HttpClient();
+                    string url2 = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
+                    var response = await httpClient.PostAsync(url, null);
+                    response.EnsureSuccessStatusCode();
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine(res);
+                        return StatusCode((int)res.StatusCode, "Failed to deduct coins");
+                    }
                 }
+                else
+                {
+                    Console.WriteLine("Je hebt niet genoeg muntjes!");
+                    return StatusCode(601);
+                }
+
+                
 
                 // Insert item into inventory
                 await using var connection = new MySqlConnection(connectionString);
