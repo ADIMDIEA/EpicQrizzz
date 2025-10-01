@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\EpicQrizzz.Questions.Rest.props" />
-</Project>

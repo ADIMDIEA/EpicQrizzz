@@ -17,6 +17,6 @@ options.forEach(option => {
 
 saveBtn.addEventListener('click', () => {
   const selectedAvatar = preview.textContent;
-  localStorage.setItem('epicqrizzz-avatar', selectedAvatar);
+  sessionStorage.setItem('epicqrizzz-avatar', selectedAvatar);
   alert('Profiel opgeslagen!');
 });
