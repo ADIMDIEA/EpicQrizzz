@@ -143,36 +143,39 @@ namespace MyBackend.Controllers
             }
         }
         [HttpPost("EditCoins/{id}")]
-        public IActionResult EditCoins(string id, int prijs, string password)
+        public async Task<IActionResult> EditCoins(string id, int prijs, string password)
         {
             try
             {
                 string serverPassword = Environment.GetEnvironmentVariable("SERVERPASSWORD");
                 if (password != serverPassword)
                 {
-                    return NotFound("You are not authorized");
+                    return Unauthorized("You are not authorized");
                 }
-                using var connection = new MySqlConnection(connectionString);
-                {
-                    connection.Open();
-                    string sql = @"UPDATE users
-                           SET munten = munten + @prijs
-                           WHERE uuid = @uuid";
-                    using var cmd = new MySqlCommand(sql, connection);
-                    cmd.Parameters.AddWithValue("@uuid", id);
-                    cmd.Parameters.AddWithValue("@prijs", prijs);
-                    using var reader = cmd.ExecuteReader();
 
-                    reader.Read();
+                await using var connection = new MySqlConnection(connectionString);
+                await connection.OpenAsync();
 
+                string sql = @"UPDATE users
+                       SET munten = munten + @prijs
+                       WHERE uuid = @uuid";
+
+                await using var cmd = new MySqlCommand(sql, connection);
+                cmd.Parameters.AddWithValue("@uuid", id);
+                cmd.Parameters.AddWithValue("@prijs", prijs);
+
+                int rowsAffected = await cmd.ExecuteNonQueryAsync();
+
+                if (rowsAffected > 0)
                     return Ok();
-                }
+                else
+                    return NotFound("User not found");
             }
             catch (Exception ex)
             {
-                return NotFound();
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Something went wrong");
             }
-            
         }
         [HttpPost("ChangeAvatar")]
         public IActionResult ChangeProfile()

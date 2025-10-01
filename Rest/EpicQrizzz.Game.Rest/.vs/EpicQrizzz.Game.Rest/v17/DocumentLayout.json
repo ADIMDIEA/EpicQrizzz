@@ -1,14 +1,10 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\",
+  "WorkspaceRootPath": "C:\\Users\\lldj0\\Desktop\\school progmeeren\\Projecten\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest\\Controllers\\GameController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:EpicQrizzz.Game.Rest\\Controllers\\GameController.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest\\Models\\GameModel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:EpicQrizzz.Game.Rest\\Models\\GameModel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{B82E8DC2-9ACD-434B-AE54-7764209BA966}|EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest.csproj|c:\\users\\lldj0\\desktop\\school progmeeren\\projecten\\epicqrizzz\\rest\\epicqrizzz.game.rest\\epicqrizzz.game.rest\\controllers\\gamecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B82E8DC2-9ACD-434B-AE54-7764209BA966}|EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest.csproj|solutionrelative:epicqrizzz.game.rest\\controllers\\gamecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,31 +14,19 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "GameModel.cs",
-              "DocumentMoniker": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest\\Models\\GameModel.cs",
-              "RelativeDocumentMoniker": "EpicQrizzz.Game.Rest\\Models\\GameModel.cs",
-              "ToolTip": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest\\Models\\GameModel.cs",
-              "RelativeToolTip": "EpicQrizzz.Game.Rest\\Models\\GameModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAcAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-18T08:04:34.802Z"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "GameController.cs",
-              "DocumentMoniker": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest\\Controllers\\GameController.cs",
+              "DocumentMoniker": "C:\\Users\\lldj0\\Desktop\\school progmeeren\\Projecten\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest\\Controllers\\GameController.cs",
               "RelativeDocumentMoniker": "EpicQrizzz.Game.Rest\\Controllers\\GameController.cs",
-              "ToolTip": "C:\\Users\\edimz\\Desktop\\Programmeren-en-SCHOOL\\Scool-Projects\\Fase-3\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest\\Controllers\\GameController.cs",
+              "ToolTip": "C:\\Users\\lldj0\\Desktop\\school progmeeren\\Projecten\\EpicQrizzz\\Rest\\EpicQrizzz.Game.Rest\\EpicQrizzz.Game.Rest\\Controllers\\GameController.cs",
               "RelativeToolTip": "EpicQrizzz.Game.Rest\\Controllers\\GameController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAL0AAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAL4BAAAAAAAAAAAowJcBAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-18T08:04:21.773Z",
+              "WhenOpened": "2025-10-01T19:18:58.309Z",
               "EditorCaption": ""
             }
           ]

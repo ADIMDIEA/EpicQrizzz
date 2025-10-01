@@ -196,8 +196,6 @@ namespace MyBackend.Controllers
             }
         }
 
-
-
         [HttpPost("JoinOrAdd")]
         public IActionResult JoinOrAdd([FromBody] GameModel game)
         {
@@ -215,18 +213,54 @@ namespace MyBackend.Controllers
                         deleteCmd.ExecuteNonQuery();
                     }
 
-                    // Insert the new game (score always starts at 0)
-                    string insertSql = @"INSERT INTO game (room, user_id, score) 
-                                 VALUES (@room, @user_id, 0)";
+                    // Check if the room already exists
+                    string checkRoomSql = "SELECT COUNT(*) FROM game WHERE room = @room";
+                    bool isHost = false;
+                    using (var checkCmd = new MySqlCommand(checkRoomSql, connection))
+                    {
+                        checkCmd.Parameters.AddWithValue("@room", game.Room);
+                        int roomCount = Convert.ToInt32(checkCmd.ExecuteScalar());
+                        isHost = roomCount == 0; // First player in room = host
+                    }
+
+                    // If it's a new room -> generate 10 random questions
+                    if (isHost)
+                    {
+                        Random rnd = new Random();
+                        var questions = Enumerable.Range(1, 150)
+                                                  .OrderBy(x => rnd.Next())
+                                                  .Take(10)
+                                                  .ToArray();
+
+                        string insertRoomSql = @"INSERT INTO room_questions 
+                                         (room, question_number, question_id) 
+                                         VALUES (@room, @qnum, @qid)";
+
+                        for (int i = 0; i < questions.Length; i++)
+                        {
+                            using (var insertRoomCmd = new MySqlCommand(insertRoomSql, connection))
+                            {
+                                insertRoomCmd.Parameters.AddWithValue("@room", game.Room);
+                                insertRoomCmd.Parameters.AddWithValue("@qnum", i + 1); // 1..10
+                                insertRoomCmd.Parameters.AddWithValue("@qid", questions[i]);
+                                insertRoomCmd.ExecuteNonQuery();
+                            }
+                        }
+                    }
+
+                    // Insert the player into the game table
+                    string insertSql = @"INSERT INTO game (room, user_id, score, host, start, question) 
+                                 VALUES (@room, @user_id, 0, @host, 0, 0)";
                     using (var insertCmd = new MySqlCommand(insertSql, connection))
                     {
                         insertCmd.Parameters.AddWithValue("@room", game.Room);
                         insertCmd.Parameters.AddWithValue("@user_id", game.UserId);
+                        insertCmd.Parameters.AddWithValue("@host", isHost ? 1 : 0);
 
                         int rowsAffected = insertCmd.ExecuteNonQuery();
 
                         if (rowsAffected > 0)
-                            return Ok("Joined or created game successfully with score 0.");
+                            return Ok(new { message = "Joined or created game successfully with score 0.", host = isHost });
                         else
                             return BadRequest("Failed to join or create game.");
                     }
@@ -240,11 +274,42 @@ namespace MyBackend.Controllers
         }
 
 
+
         [HttpGet("CheckGameAnswer/{userId}/{questionId}/{answer}")]
         public async Task<IActionResult> CheckGameAnswer(string userId, int questionId, string answer)
         {
             try
             {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // Check if the user exists and if their room has started
+                    string checkSql = @"SELECT g.start 
+                                FROM game g 
+                                WHERE g.user_id = @user_id";
+                    bool roomStarted = false;
+
+                    using (var checkCmd = new MySqlCommand(checkSql, connection))
+                    {
+                        checkCmd.Parameters.AddWithValue("@user_id", userId);
+                        var result = checkCmd.ExecuteScalar();
+
+                        if (result == null)
+                        {
+                            return NotFound("User not found in game table.");
+                        }
+
+                        roomStarted = Convert.ToBoolean(result);
+                    }
+
+                    if (!roomStarted)
+                    {
+                        return BadRequest("The game has not started yet for this room.");
+                    }
+                }
+
+                // Only continue if the room has started
                 using (var httpClient = new HttpClient())
                 {
                     // Call external API
@@ -290,7 +355,147 @@ namespace MyBackend.Controllers
             }
         }
 
+        [HttpPost("StartGame")]
+        public IActionResult StartGame([FromBody] Guid userId)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
 
+                    // 1. Get the room and check if the user is the host
+                    string checkHostSql = "SELECT room, host FROM game WHERE user_id = @user_id";
+                    string room = null;
+                    bool isHost = false;
+
+                    using (var cmd = new MySqlCommand(checkHostSql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@user_id", userId);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                room = reader["room"].ToString();
+                                isHost = Convert.ToBoolean(reader["host"]);
+                            }
+                            else
+                            {
+                                return BadRequest("User not found in any game.");
+                            }
+                        }
+                    }
+
+                    if (!isHost)
+                    {
+                        return BadRequest("Only the host can start the game.");
+                    }
+
+                    // 2. Set start = true for all players in the same room
+                    string updateStartSql = "UPDATE game SET start = 1 WHERE room = @room";
+                    using (var updateCmd = new MySqlCommand(updateStartSql, connection))
+                    {
+                        updateCmd.Parameters.AddWithValue("@room", room);
+                        int rowsAffected = updateCmd.ExecuteNonQuery();
+
+                        return Ok(new { message = $"Game started for {rowsAffected} player(s) in room {room}." });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "An error occurred.");
+            }
+        }
+
+        [HttpGet("GetGameQuestion/{userId}")]
+        public async Task<IActionResult> GetGameQuestion(string userId)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    // 1. Check if the user is in a started room
+                    string checkRoomSql = "SELECT room, question, start FROM game WHERE user_id = @user_id";
+                    string room = null;
+                    int questionIndex = 0;
+                    bool roomStarted = false;
+
+                    using (var cmd = new MySqlCommand(checkRoomSql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@user_id", userId);
+                        using (var reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                room = reader["room"].ToString();
+                                questionIndex = Convert.ToInt32(reader["question"]);
+                                roomStarted = Convert.ToBoolean(reader["start"]);
+                            }
+                            else
+                            {
+                                return NotFound("User not found in game table.");
+                            }
+                        }
+                    }
+
+                    if (!roomStarted)
+                        return BadRequest("The game has not started yet for this room.");
+
+                    // 2. Get the question_id from room_questions for this room and index
+                    string questionSql = @"SELECT question_id 
+                                   FROM room_questions 
+                                   WHERE room = @room AND question_number = @qnum";
+                    int? questionId = null;
+
+                    using (var cmd = new MySqlCommand(questionSql, connection))
+                    {
+                        cmd.Parameters.AddWithValue("@room", room);
+                        cmd.Parameters.AddWithValue("@qnum", questionIndex + 1); // question_number starts at 1
+                        var result = cmd.ExecuteScalar();
+                        if (result != null)
+                        {
+                            questionId = Convert.ToInt32(result);
+                        }
+                        else
+                        {
+                            return BadRequest("No more questions in this room.");
+                        }
+                    }
+
+                    // 3. Call external API to get question by id
+                    using (var httpClient = new HttpClient())
+                    {
+                        string url = $"http://joost.assenbergh.nl:5291/api/quetion/GetById/{questionId}";
+                        var response = await httpClient.GetAsync(url);
+
+                        if (!response.IsSuccessStatusCode)
+                            return StatusCode((int)response.StatusCode, "External API call failed.");
+
+                        var questionData = await response.Content.ReadAsStringAsync();
+
+                        // 4. Increment user's question index
+                        string updateSql = @"UPDATE game SET question = question + 1 WHERE user_id = @user_id";
+                        using (var updateCmd = new MySqlCommand(updateSql, connection))
+                        {
+                            updateCmd.Parameters.AddWithValue("@user_id", userId);
+                            updateCmd.ExecuteNonQuery();
+                        }
+
+                        // 5. Return the external API JSON directly
+                        return Content(questionData, "application/json");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "An error occurred while fetching the question.");
+            }
+        }
 
 
 
