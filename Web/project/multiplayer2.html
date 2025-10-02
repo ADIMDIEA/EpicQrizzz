@@ -16,7 +16,8 @@
 <body>
 <div class="container py-5">
   <div class="text-center mb-4">
-    <h2 id="roomInfo" class="fw-bold text-primary">Multiplayer Room</h2>
+    <h2 id="roomInfo" class="fw-bold text-primary">EpicQrizzz – Multiplayer Room</h2>
+    <p class="text-muted" id="roomSubInfo">Even geduld terwijl het spel wordt geladen...</p>
   </div>
 
   <div class="row">
@@ -62,9 +63,12 @@
   const room = urlParams.get("room");
   const userUUID = urlParams.get("user");
 
-  if (!room || !userUUID) alert("Missing room or user information!");
-
-  document.getElementById("roomInfo").innerText = `Room: ${room} | User: ${userUUID}`;
+  if (!room || !userUUID) {
+    alert("Missing room or user information!");
+  } else {
+    // Toon alleen de naam van de kamer, niet de UUID
+    document.getElementById("roomSubInfo").innerText = `Je zit in kamer: ${room}`;
+  }
 
   let currentQuestionId = null;
   let gameEnded = false;
@@ -75,7 +79,6 @@
     try {
       const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/GetGameQuestion/${userUUID}`);
       if (res.status === 400) {
-        // Alle vragen beantwoord → start endgame polling
         document.getElementById("quiz").innerHTML = `<p class="text-primary fw-bold">🎉 Je hebt alle vragen beantwoord!</p>`;
         document.getElementById("result").innerHTML = "";
         pollEndGame();
@@ -174,7 +177,7 @@
     if (gameEnded) return;
     try {
       const res = await fetch(`http://joost.assenbergh.nl:5293/api/Game/EndGame/${userUUID}`);
-      if (!res.ok) return; // nog niet klaar
+      if (!res.ok) return;
 
       const data = await res.json();
       if (data.top3 && data.top3.length > 0) {
@@ -189,7 +192,7 @@
           ul.appendChild(li);
         });
       } else {
-        setTimeout(pollEndGame, 2000); // blijf checken elke 2 sec
+        setTimeout(pollEndGame, 2000);
       }
     } catch (err) {
       console.error("Error polling end game:", err);
