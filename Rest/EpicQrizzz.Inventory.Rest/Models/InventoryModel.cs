@@ -2,7 +2,8 @@ namespace EpicQrizzz.Inventory.Rest
 {
     public class Inventory
     {
-        public string userId { get; set; } = string.Empty;
         public int itemId { get; set; } = 0;
+
+        public int equipped { get; set; } = 0;
     }
 }
