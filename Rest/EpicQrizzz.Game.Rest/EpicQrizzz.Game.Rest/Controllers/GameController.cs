@@ -451,7 +451,7 @@ namespace MyBackend.Controllers
 
 
 
-    [HttpGet("GetGameQuestion/{userId}")]
+        [HttpGet("GetGameQuestion/{userId}")]
         public async Task<IActionResult> GetGameQuestion(string userId)
         {
             var stopwatch = new Stopwatch();
