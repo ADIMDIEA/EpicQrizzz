@@ -4,6 +4,7 @@ using EpicQrizzz.Game.Rest.Models;
 using System.Reflection.PortableExecutable;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
+using System.Diagnostics;
 
 
 
@@ -450,16 +451,21 @@ namespace MyBackend.Controllers
 
 
 
-        [HttpGet("GetGameQuestion/{userId}")]
+    [HttpGet("GetGameQuestion/{userId}")]
         public async Task<IActionResult> GetGameQuestion(string userId)
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             try
             {
                 using (var connection = new MySqlConnection(connectionString))
                 {
                     connection.Open();
+                    Console.WriteLine($"[LOG] Opened DB connection in {stopwatch.ElapsedMilliseconds} ms");
 
                     // 1. Check if the user is in a started room
+                    stopwatch.Restart();
                     string checkRoomSql = "SELECT room, question, start FROM game WHERE user_id = @user_id";
                     string room = null;
                     int questionIndex = 0;
@@ -482,14 +488,16 @@ namespace MyBackend.Controllers
                             }
                         }
                     }
+                    Console.WriteLine($"[LOG] Fetched user game info in {stopwatch.ElapsedMilliseconds} ms");
 
                     if (!roomStarted)
                         return BadRequest("The game has not started yet for this room.");
 
                     // 2. Get the question_id from room_questions for this room and index
+                    stopwatch.Restart();
                     string questionSql = @"SELECT question_id 
-                                   FROM room_questions 
-                                   WHERE room = @room AND question_number = @qnum";
+                                       FROM room_questions 
+                                       WHERE room = @room AND question_number = @qnum";
                     int? questionId = null;
 
                     using (var cmd = new MySqlCommand(questionSql, connection))
@@ -506,8 +514,10 @@ namespace MyBackend.Controllers
                             return BadRequest("No more questions in this room.");
                         }
                     }
+                    Console.WriteLine($"[LOG] Retrieved question_id in {stopwatch.ElapsedMilliseconds} ms");
 
                     // 3. Call external API to get question by id
+                    stopwatch.Restart();
                     using (var httpClient = new HttpClient())
                     {
                         string url = $"http://joost.assenbergh.nl:5291/api/quetion/GetById/{questionId}";
@@ -517,6 +527,7 @@ namespace MyBackend.Controllers
                             return StatusCode((int)response.StatusCode, "External API call failed.");
 
                         var questionData = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"[LOG] External API call took {stopwatch.ElapsedMilliseconds} ms");
 
                         // 4. Return the external API JSON directly WITHOUT incrementing
                         return Content(questionData, "application/json");
@@ -525,12 +536,14 @@ namespace MyBackend.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"[ERROR] {ex.Message}");
                 return StatusCode(500, "An error occurred while fetching the question.");
             }
         }
 
-        [HttpGet("EndGame/{userId}")]
+
+
+    [HttpGet("EndGame/{userId}")]
         public async Task<IActionResult> EndGame(string userId)
         {
             try
