@@ -98,3 +98,30 @@ body {
   body, button, select {
     font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   }
+  
+    body, button, select {
+    font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .quiz-scroll-container {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 1rem;
+    scrollbar-width: thin;
+  }
+
+  @media (max-width: 768px) {
+    .quiz-scroll-container {
+      max-height: 70vh;
+    }
+  }
+
+    /* ✅ Kleinere tekst voor vraag en antwoorden */
+  #quiz-question {
+    font-size: 1.1rem; /* was h4-grootte (~1.5rem) → iets kleiner */
+  }
+
+  #answer-options button {
+    font-size: 0.95rem; /* standaard is ~1rem, dus iets compacter */
+    padding: 8px 12px; /* eventueel iets minder padding */
+  }

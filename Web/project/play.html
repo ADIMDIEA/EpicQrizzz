@@ -6,32 +6,13 @@
   <title>EpicQrizzz - Oefenen</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/css/style.css" rel="stylesheet">
-  <style>
-    body, button, select {
-      font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-    }
 
-    .quiz-scroll-container {
-      max-height: 60vh;
-      overflow-y: auto;
-      padding: 1rem;
-      scrollbar-width: thin;
-    }
-
-    @media (max-width: 768px) {
-      .quiz-scroll-container {
-        max-height: 70vh;
-      }
-    }
-  </style>
 </head>
 <body class="d-flex flex-column align-items-center justify-content-center vh-100">
 
   <div class="card shadow-lg text-center p-4" style="max-width:900px; width:100%;">
-    <!-- Logo -->
     <img src="assets/img/logo.png" alt="Logo" class="mb-4" style="max-width:140px; margin:auto;">
 
-    <!-- Setup sectie -->
     <div id="setup-container">
       <h4 class="text-primary mb-3">Kies oefentijd</h4>
       <select id="duration-select" class="form-select mb-3" style="max-width: 200px; margin:auto;">
@@ -43,26 +24,21 @@
       <button class="btn btn-primary" id="start-btn">Start Oefenen</button>
     </div>
 
-    <!-- Quiz sectie -->
     <div id="quiz-container" style="display:none;">
       <div class="row g-4">
-        <!-- Linkerkant: speler stats en Home knop direct onder avatar/naam -->
         <div class="col-md-3 d-flex flex-column align-items-center">
           <div class="display-1" id="player-avatar">🙂</div>
           <p id="player-name" class="fw-bold text-primary">Jij</p>
 
-          <!-- Home-knop direct onder naam -->
           <button class="btn btn-secondary w-100 mb-3" id="back-btn">Terug naar Home</button>
 
           <p class="fw-bold">Goed: <span id="player-score">0</span></p>
           <p class="fw-bold">Fout: <span id="player-mistakes">0</span></p>
           <p class="fw-bold text-danger">Tijd: <span id="time-remaining">--:--</span></p>
 
-          <!-- Feedback onder stats -->
           <div id="result" class="fw-bold text-center mt-3"></div>
         </div>
 
-        <!-- Rechts: quiz vraag + antwoorden -->
         <div class="col-md-9">
           <div class="quiz-scroll-container">
             <div class="h4 mb-3 text-primary" id="quiz-question">Vraag wordt geladen...</div>
