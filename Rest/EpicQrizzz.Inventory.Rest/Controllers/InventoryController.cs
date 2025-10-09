@@ -7,14 +7,14 @@ using System.Globalization;
 namespace MyBackend.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class InventoryController : ControllerBase
     {
         string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
 
         [HttpGet("GetAll")]
         public IActionResult GetAll()
-        {
+        {   
             var inventories = new List<Inventory>();
 
             using (var connection = new MySqlConnection(connectionString))
