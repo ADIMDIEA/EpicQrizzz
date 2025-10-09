@@ -20,3 +20,7 @@ saveBtn.addEventListener('click', () => {
   sessionStorage.setItem('epicqrizzz-avatar', selectedAvatar);
   alert('Profiel opgeslagen!');
 });
+
+const avatars = {
+  "😊": 1
+}
