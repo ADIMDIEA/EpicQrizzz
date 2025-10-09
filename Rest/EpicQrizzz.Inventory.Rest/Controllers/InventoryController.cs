@@ -94,6 +94,37 @@ namespace MyBackend.Controllers
                 return NotFound();
             }
         }
+        [HttpGet("GetById/{id}")]
+        public IActionResult GetById(string id)
+        {
+            try
+            {
+                var inventory = new Inventory();
+
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sql = "SELECT itemid, equipped FROM inventory WHERE userid = @uuid";
+                    using var cmd = new MySqlCommand(sql, connection);
+                    cmd.Parameters.AddWithValue("@uuid", id);
+                    using var reader = cmd.ExecuteReader();
+                    if (!reader.Read())
+                    {
+                        return NotFound();
+                    }
+
+                    inventory.itemId = reader.GetInt32("itemid");
+                    inventory.equipped = reader.GetInt32("equipped");
+                }
+                return Ok(inventory);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return NotFound();
+            }
+        }
     }
 }
     
