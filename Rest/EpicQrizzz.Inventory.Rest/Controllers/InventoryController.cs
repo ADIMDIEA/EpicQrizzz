@@ -10,7 +10,7 @@ namespace MyBackend.Controllers
     [Route("[controller]")]
     public class InventoryController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=EpicQrizzz;User=root;Password=";
+        string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
 
         [HttpGet("GetAll")]
         public IActionResult GetAll()
