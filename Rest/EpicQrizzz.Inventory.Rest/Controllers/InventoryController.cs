@@ -10,7 +10,7 @@ namespace MyBackend.Controllers
     [Route("[controller]")]
     public class InventoryController : ControllerBase
     {
-        string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
+        string connectionString = "Server=localhost;Database=EpicQrizzz;User=root;Password=";
 
         [HttpGet("GetAll")]
         public IActionResult GetAll()
@@ -99,7 +99,7 @@ namespace MyBackend.Controllers
         {
             try
             {
-                var inventory = new Inventory();
+                var inventories = new List<Inventory>();
 
                 using (var connection = new MySqlConnection(connectionString))
                 {
@@ -109,15 +109,18 @@ namespace MyBackend.Controllers
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@uuid", id);
                     using var reader = cmd.ExecuteReader();
-                    if (!reader.Read())
-                    {
-                        return NotFound();
-                    }
 
-                    inventory.itemId = reader.GetInt32("itemid");
-                    inventory.equipped = reader.GetInt32("equipped");
+                    while (reader.Read())
+                    {
+                        var inventory = new Inventory
+                        {
+                            itemId = reader.GetInt32("itemid"),
+                            equipped = reader.GetInt32("equipped")
+                        };
+                        inventories.Add(inventory);
+                    }
                 }
-                return Ok(inventory);
+                return Ok(inventories);
             }
             catch (Exception ex)
             {
