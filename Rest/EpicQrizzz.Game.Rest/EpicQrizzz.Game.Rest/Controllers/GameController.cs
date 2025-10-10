@@ -107,7 +107,7 @@ namespace MyBackend.Controllers
         private async Task<string> GetUsernameById(string userId)
         {
             using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync($"https://joost.assenbergh.nl:5292/api/user/GetById/{userId}");
+            var response = await httpClient.GetAsync($"http://joost.assenbergh.nl:5292/api/user/GetById/{userId}");
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
@@ -316,7 +316,7 @@ namespace MyBackend.Controllers
                     // Call external API to check answer
                     using (var httpClient = new HttpClient())
                     {
-                        string url = $"https://joost.assenbergh.nl:5291/api/quetion/CheckAnswer/{questionId}/{answer}";
+                        string url = $"http://joost.assenbergh.nl:5291/api/quetion/CheckAnswer/{questionId}/{answer}";
                         var response = await httpClient.GetAsync(url);
 
                         if (!response.IsSuccessStatusCode)
@@ -520,7 +520,7 @@ namespace MyBackend.Controllers
                     stopwatch.Restart();
                     using (var httpClient = new HttpClient())
                     {
-                        string url = $"https://joost.assenbergh.nl:5291/api/quetion/GetById/{questionId}";
+                        string url = $"http://joost.assenbergh.nl:5291/api/quetion/GetById/{questionId}";
                         var response = await httpClient.GetAsync(url);
 
                         if (!response.IsSuccessStatusCode)
@@ -608,7 +608,7 @@ namespace MyBackend.Controllers
                         if (string.IsNullOrEmpty(serverPassword))
                             return StatusCode(500, "Server password not set in environment variables.");
 
-                        string url = $"https://joost.assenbergh.nl:5292/api/user/EditCoins/{topWinnerId}?prijs=10&password={serverPassword}";
+                        string url = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{topWinnerId}?prijs=10&password={serverPassword}";
                         var response = await httpClientForEditCoins.PostAsync(url, null);
                         response.EnsureSuccessStatusCode();
                     }
