@@ -34,14 +34,14 @@ namespace MyBackend.Controllers
 
                 // Call EditCoins API asynchronously
                 using var httpClient = new HttpClient();
-                string url = $"http://joost.assenbergh.nl:5292/api/user/GetById/{userid}";
+                string url = $"https://joost.assenbergh.nl:5292/api/user/GetById/{userid}";
                 var res = await httpClient.GetAsync(url);
                 res.EnsureSuccessStatusCode();
                 string json = await res.Content.ReadAsStringAsync();
                 if (JsonDocument.Parse(json).RootElement.GetProperty("munten").GetInt32() >= 5)
                 {
                     using var httpClientForEditCoins = new HttpClient();
-                    string url2 = $"http://joost.assenbergh.nl:5292/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
+                    string url2 = $"https://joost.assenbergh.nl:5292/api/user/EditCoins/{userid}?prijs=-5&password={serverPassword}";
                     var response = await httpClient.PostAsync(url2, null);
                     response.EnsureSuccessStatusCode();
                     if (!response.IsSuccessStatusCode)
@@ -57,7 +57,7 @@ namespace MyBackend.Controllers
                 }
 
                 using var httpClientForCheckingItem = new HttpClient();
-                string url3 = $"http://joost.assenbergh.nl:5295/api/Inventory/GetById/{userid}";
+                string url3 = $"https://joost.assenbergh.nl:5295/api/Inventory/GetById/{userid}";
                 var r = await httpClient.GetAsync(url3);
                 r.EnsureSuccessStatusCode();
                 string json2 = await r.Content.ReadAsStringAsync();

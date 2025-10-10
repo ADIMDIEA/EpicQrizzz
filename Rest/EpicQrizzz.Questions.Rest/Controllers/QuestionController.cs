@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using EpicQrizzz.Questions.Rest.Models;
 using System.Reflection.PortableExecutable;
 using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 
 
@@ -84,58 +85,67 @@ namespace MyBackend.Controllers
 
 
         [HttpGet("GetById/{id}")]
-        public IActionResult GetById(int id)
+        public async Task<IActionResult> GetById(int id)
         {
             try
             {
                 var question = new Question();
 
+                // First DB query: get the question
                 using (var connection = new MySqlConnection(connectionString))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
 
                     string sql = "SELECT * FROM questions WHERE Id = @id";
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@id", id);
-                    using var reader = cmd.ExecuteReader();
 
-                    reader.Read();
-
-                    question.Id = reader.GetInt32("Id");
-                    question.QuestionText = reader.GetString("question_text");
-
+                    using var reader = await cmd.ExecuteReaderAsync();
+                    if (await reader.ReadAsync())
+                    {
+                        question.Id = reader.GetInt32("Id");
+                        question.QuestionText = reader.GetString("question_text");
+                    }
+                    else
+                    {
+                        return NotFound($"Question with Id={id} not found.");
+                    }
                 }
 
+                // Second DB query: get the choices
                 using (var connection = new MySqlConnection(connectionString))
                 {
-                    connection.Open();
+                    await connection.OpenAsync();
 
                     string sql = "SELECT * FROM choices WHERE question_id = @id";
                     using var cmd = new MySqlCommand(sql, connection);
                     cmd.Parameters.AddWithValue("@id", id);
-                    using var reader = cmd.ExecuteReader();
-                    var awnsers = new List<Awnser>();
-                    while (reader.Read())
+
+                    using var reader = await cmd.ExecuteReaderAsync();
+                    var answers = new List<Awnser>();
+                    while (await reader.ReadAsync())
                     {
-                        var awnser = new Awnser();
-                        awnser.Id = reader.GetInt32("Id");
-                        awnser.AwnserText = reader.GetString("choice_text");
-                        awnser.Option = reader.GetString("identifier");
-                        awnsers.Add(awnser);
+                        var answer = new Awnser
+                        {
+                            Id = reader.GetInt32("Id"),
+                            AwnserText = reader.GetString("choice_text"),
+                            Option = reader.GetString("identifier")
+                        };
+                        answers.Add(answer);
                     }
 
-                    question.Options = awnsers;
+                    question.Options = answers;
                 }
+
                 return Ok(question);
             }
             catch (Exception ex)
             {
-                // Log the exception or inspect it
                 Console.WriteLine(ex.Message); // For debugging
-                return StatusCode(500, "An error occurred."); // Better than NotFound
+                return StatusCode(500, "An error occurred.");
             }
-
         }
+
         [AllowAnonymous]
         [HttpPost("Add")]
         public IActionResult Add([FromBody] Question question)
