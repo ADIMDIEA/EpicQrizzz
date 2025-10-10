@@ -108,6 +108,3 @@ saveBtn.addEventListener("click", async () => {
 // ===== Start =====
 loadInventory();
 
-const avatars = {
-  "😊": 1
-}

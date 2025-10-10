@@ -4,30 +4,55 @@ const avatarDisplay = document.getElementById("avatar-display");
 const adminBtn = document.getElementById("admin-btn");
 const logoutBtn = document.getElementById("logout-btn");
 
+// ===== Alle avatars =====
+const allAvatars = {
+  1: "🙂",
+  2: "😎",
+  3: "👩‍⚕️",
+  4: "👨‍⚕️",
+  5: "👽",
+  6: "👻",
+  7: "🤖",
+  8: "🐉",
+  9: "🦊",
+  10: "🐧",
+  11: "🐵",
+  12: "🐸",
+  13: "🐼",
+  14: "🦁",
+  15: "🐰",
+  16: "🐱"
+};
+
 // Huidige gebruiker ophalen (sessie/cookie uit backend)
 async function loadUser() {
   try {
-
-    const res = await fetch(`${backendBase}/GetById/${sessionStorage.getItem("epicqrizzz-userId")}`);
-    if (!res.ok) throw new Error("Netwerkfout");
-    const uuid = await res.json();
-    if (!uuid) throw new Error("Geen gebruiker gevonden");
-    const username = sessionStorage.getItem("epicqrizzz-username");
-
-    // Zoek de span op
-    const welcomeEl = document.getElementById("welcome-text");
-
-    // Pas de tekst aan
-    if (username) {
-      welcomeEl.textContent = `🙂 Hallo, ${username}!`;
-    } else {
-      welcomeEl.textContent = "🙂 Hallo, gebruiker!";
-    }
-
-    if (!sessionStorage.getItem("epicqrizzz-userId")) {
-      // niet ingelogd, terug naar login
+    const userId = sessionStorage.getItem("epicqrizzz-userId");
+    if (!userId) {
       window.location.href = "login.html";
       return;
+    }
+
+    const res = await fetch(`${backendBase}/GetById/${userId}`);
+    if (!res.ok) throw new Error("Netwerkfout");
+
+    const uuid = await res.json();
+    if (!uuid) throw new Error("Geen gebruiker gevonden");
+
+    const username = sessionStorage.getItem("epicqrizzz-username");
+    const welcomeEl = document.getElementById("welcome-text");
+
+    // ===== Avatar ophalen uit sessionStorage =====
+    const selectedAvatarId = sessionStorage.getItem("selectedAvatarId");
+    const avatarEmoji = selectedAvatarId && allAvatars[selectedAvatarId]
+      ? allAvatars[selectedAvatarId]
+      : "🙂";
+
+    // Tekst tonen met emoji en gebruikersnaam
+    if (username) {
+      welcomeEl.textContent = `${avatarEmoji} Hallo, ${username}!`;
+    } else {
+      welcomeEl.textContent = `${avatarEmoji} Hallo, gebruiker!`;
     }
 
   } catch (err) {
