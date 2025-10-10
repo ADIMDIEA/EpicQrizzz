@@ -28,10 +28,23 @@ loginForm.addEventListener("submit", async (e) => {
       const data = await res.json();
       sessionStorage.setItem("epicqrizzz-userId", data.id);
       sessionStorage.setItem("epicqrizzz-username", username);
+      const response = await fetch(`http://joost.assenbergh.nl:5295/api/Inventory/CheckEquipped/${data.id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+      }); 
+      if (response.ok) {
+        const data2 = await response.json();
+        console.log(data2)
+        sessionStorage.setItem("selectedAvatarId", data2.itemId);
+      } else {
+        alert("Probleem met het inladen van je avatar.")
+      }
       window.location.href = "home.html";
     } else {
       alert("Login mislukt: " + res.statusText);
     }
+    
+
   } catch (err) {
     console.error(err);
     alert("Er ging iets mis met inloggen");
