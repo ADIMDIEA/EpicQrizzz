@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-
+using EpicQrizzz.Inventory.Rest;
 using MySql.Data.MySqlClient;
 using System.Text.Json;
 namespace MyBackend.Controllers
@@ -56,7 +56,20 @@ namespace MyBackend.Controllers
                     return StatusCode(601);
                 }
 
+                using var httpClientForCheckingItem = new HttpClient();
+                string url3 = $"http://joost.assenbergh.nl:5295/api/Inventory/GetById/{userid}";
+                var r = await httpClient.GetAsync(url3);
+                r.EnsureSuccessStatusCode();
+                string json2 = await r.Content.ReadAsStringAsync();
                 
+                foreach (var item in JsonSerializer.Deserialize<List<Inventory>>(json2))
+                {
+                    if (item.itemId == randomItemId)
+                    {
+                        Console.WriteLine(r);
+                        return StatusCode(602, "Bummer you already had this item");
+                    }
+                }
 
                 // Insert item into inventory
                 await using var connection = new MySqlConnection(connectionString);

@@ -7,14 +7,14 @@ using System.Globalization;
 namespace MyBackend.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class InventoryController : ControllerBase
     {
         string connectionString = "Server=localhost;Database=Qrizz;User=lucas;Password=NegerBallen69!";
 
         [HttpGet("GetAll")]
         public IActionResult GetAll()
-        {
+        {   
             var inventories = new List<Inventory>();
 
             using (var connection = new MySqlConnection(connectionString))
@@ -87,6 +87,40 @@ namespace MyBackend.Controllers
 
                     return CreatedAtAction("Equip", "itemid", new { itemId = itemid } );
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return NotFound();
+            }
+        }
+        [HttpGet("GetById/{id}")]
+        public IActionResult GetById(string id)
+        {
+            try
+            {
+                var inventories = new List<Inventory>();
+
+                using (var connection = new MySqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    string sql = "SELECT itemid, equipped FROM inventory WHERE userid = @uuid";
+                    using var cmd = new MySqlCommand(sql, connection);
+                    cmd.Parameters.AddWithValue("@uuid", id);
+                    using var reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        var inventory = new Inventory
+                        {
+                            itemId = reader.GetInt32("itemid"),
+                            equipped = reader.GetInt32("equipped")
+                        };
+                        inventories.Add(inventory);
+                    }
+                }
+                return Ok(inventories);
             }
             catch (Exception ex)
             {

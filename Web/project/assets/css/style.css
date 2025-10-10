@@ -34,3 +34,94 @@ body {
 .card {
   border-radius: 1.5rem;
 }
+
+body {
+  background-color: #ffe6f0;
+}
+
+.card {
+  max-width: 900px;
+  width: 100%;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+#quiz-container {
+  height: 400px; /* vaste hoogte van het witte vlak */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#quiz-question {
+  font-size: clamp(1rem); /* schaalt bij langere tekst */
+  /* text-align: justify; */
+  overflow-wrap: break-word;
+  margin-bottom: 1rem;
+}
+
+#answer-options {
+  display: grid;
+  gap: rem;
+}
+
+#answer-options button {
+  white-space: normal;
+  word-wrap: break-word;
+  min-height: 50px; /* minimale hoogte zodat knoppen niet te klein worden */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Optioneel: knoppen gelijk maken per rij, handig bij 2 of meer kolommen */
+#answer-options .btn {
+  width: 100%;
+}
+
+    /* Zorg dat quizinhoud netjes binnen de card blijft */
+  .quiz-scroll-container {
+    max-height: 60vh;       /* Hoogte beperken zodat het niet uitsteekt */
+    overflow-y: auto;       /* Scrollbalk bij lange vragen */
+    padding: 1rem;
+    scrollbar-width: thin;  /* Mooie smalle scrollbar */
+  }
+
+  /* Voor kleine schermen iets meer hoogte toestaan */
+  @media (max-width: 768px) {
+    .quiz-scroll-container {
+      max-height: 70vh;
+    }
+  }
+
+  /* Font consistent */
+  body, button, select {
+    font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+    body, button, select {
+    font-family: 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .quiz-scroll-container {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 1rem;
+    scrollbar-width: thin;
+  }
+
+  @media (max-width: 768px) {
+    .quiz-scroll-container {
+      max-height: 70vh;
+    }
+  }
+
+    /* ✅ Kleinere tekst voor vraag en antwoorden */
+  #quiz-question {
+    font-size: 1.1rem; /* was h4-grootte (~1.5rem) → iets kleiner */
+  }
+
+  #answer-options button {
+    font-size: 0.95rem; /* standaard is ~1rem, dus iets compacter */
+    padding: 8px 12px; /* eventueel iets minder padding */
+  }
