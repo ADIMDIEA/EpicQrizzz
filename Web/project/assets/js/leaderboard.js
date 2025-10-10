@@ -1,36 +1,13 @@
 const backendBase = "http://joost.assenbergh.nl:5292/api/User";
 const leaderboardBody = document.getElementById("leaderboard-body");
 const logoutBtn = document.getElementById("logout-btn");
-const welcomeEl = document.getElementById("welcome-text");
 const myScoreEl = document.getElementById("my-score");
 
-// 🔸 Avatar mapping (zelfde als in profile.js)
+// 🔹 Zelfde emoji's als bij profiel
 const allAvatars = {
   1: "🙂", 2: "😎", 3: "👩‍⚕️", 4: "👨‍⚕️", 5: "👽", 6: "👻", 7: "🤖", 8: "🐉",
   9: "🦊", 10: "🐧", 11: "🐵", 12: "🐸", 13: "🐼", 14: "🦁", 15: "🐰", 16: "🐱"
 };
-
-// 🔹 Huidige gebruiker laden
-async function loadUser() {
-  try {
-    const userId = sessionStorage.getItem("epicqrizzz-userId");
-    if (!userId) {
-      window.location.href = "login.html";
-      return;
-    }
-
-    const res = await fetch(`${backendBase}/GetById/${userId}`);
-    if (!res.ok) throw new Error("Netwerkfout");
-    const user = await res.json();
-
-    const username = sessionStorage.getItem("epicqrizzz-username") || user.name || "gebruiker";
-    welcomeEl.textContent = `🙂 Hallo, ${username}!`;
-
-  } catch (err) {
-    console.error("Kon gebruiker niet ophalen:", err);
-    window.location.href = "login.html";
-  }
-}
 
 // 🔹 Leaderboard ophalen
 async function loadLeaderboard() {
@@ -43,7 +20,6 @@ async function loadLeaderboard() {
     // Sorteer op munten (aflopend)
     users.sort((a, b) => b.munten - a.munten);
 
-    // HTML tabel opbouwen
     leaderboardBody.innerHTML = "";
 
     const currentUsername = sessionStorage.getItem("epicqrizzz-username");
@@ -56,35 +32,37 @@ async function loadLeaderboard() {
     users.forEach((user, index) => {
       const row = document.createElement("tr");
 
-      // Gouden, zilveren, bronzen icoontjes voor top 3
+      // Top 3 icoontjes
       let rankIcon = "";
       if (index === 0) rankIcon = "🥇";
       else if (index === 1) rankIcon = "🥈";
       else if (index === 2) rankIcon = "🥉";
 
-      // Avatar placeholder (zelfde voor iedereen voorlopig)
-      const avatarEmoji =
-        user.name === currentUsername ? myAvatar : "🙂"; // eventueel later uitbreidbaar
+      const avatarEmoji = user.name === currentUsername ? myAvatar : "🙂";
+
+      // 🔸 Username beperken tot max. 15 karakters
+      const truncatedName =
+        user.name.length > 15 ? user.name.substring(0, 15) + "…" : user.name;
 
       row.innerHTML = `
         <td><strong>${index + 1}</strong> ${rankIcon}</td>
         <td class="fs-5">${avatarEmoji}</td>
-        <td>${user.name}</td>
+        <td><span class="truncate" title="${user.name}">${truncatedName}</span></td>
         <td><i class="bi bi-coin text-warning"></i> ${user.munten}</td>
       `;
       leaderboardBody.appendChild(row);
 
-      // Onthoud rank en coins van huidige gebruiker
+      // Onthoud eigen positie
       if (user.name === currentUsername) {
         myRank = index + 1;
         myCoins = user.munten;
       }
     });
 
-    // Toon eigen positie
+    // Toon eigen score
     if (myRank !== null) {
       myScoreEl.innerHTML = `
-        ${myAvatar} Jij staat op plek <strong>${myRank}</strong> 
+        ${myAvatar} Jij staat op plek <strong>${myRank}</strong>
         met <strong><i class="bi bi-coin text-warning"></i> ${myCoins}</strong> munten!
       `;
     } else {
@@ -113,5 +91,4 @@ logoutBtn.addEventListener("click", async () => {
 });
 
 // Init
-loadUser();
 loadLeaderboard();
