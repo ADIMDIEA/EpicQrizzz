@@ -1,23 +1,55 @@
+const backendBase = "http://joost.assenbergh.nl:5292/api/User";
+
+// ===== Alle avatars =====
+const allAvatars = {
+  1: "🙂",
+  2: "😎",
+  3: "👩‍⚕️",
+  4: "👨‍⚕️",
+  5: "👽",
+  6: "👻",
+  7: "🤖",
+  8: "🐉",
+  9: "🦊",
+  10: "🐧",
+  11: "🐵",
+  12: "🐸",
+  13: "🐼",
+  14: "🦁",
+  15: "🐰",
+  16: "🐱"
+};
+
+// ===== Player data =====
 const gameData = {  
   player: {
     name: "Jij",
-    avatar: localStorage.getItem("epicqrizzz-avatar") || "🙂",
     score: 0,
-    mistakes: 0
+    mistakes: 0,
+    avatar: "🙂" // standaard
   },
   currentQuestionId: null,
   questionCount: 0,
   maxQuestions: 170,
   gameEnded: false,
   askedQuestions: new Set(),
-  durationMinutes: 10, // standaard oefentijd
+  durationMinutes: 10,
   timeRemaining: 0,
   timerInterval: null
 };
 
 let isLoading = false; // voorkomt dubbele loadQuestion-aanroepen
 
+// Avatar en naam ophalen uit sessionStorage zoals bij home.js
+function loadPlayerAvatar() {
+  const selectedAvatarId = sessionStorage.getItem("selectedAvatarId");
+  gameData.player.avatar = selectedAvatarId && allAvatars[selectedAvatarId]
+    ? allAvatars[selectedAvatarId]
+    : "🙂";
+}
+
 // UI vullen
+loadPlayerAvatar();
 document.getElementById("player-avatar").textContent = gameData.player.avatar;
 document.getElementById("player-name").textContent = gameData.player.name;
 document.getElementById("player-score").textContent = gameData.player.score;
@@ -27,7 +59,7 @@ document.getElementById("player-mistakes").textContent = gameData.player.mistake
 document.getElementById("start-btn").addEventListener("click", () => {
   const select = document.getElementById("duration-select");
   gameData.durationMinutes = parseInt(select.value, 10);
-  gameData.timeRemaining = gameData.durationMinutes * 60; // seconden
+  gameData.timeRemaining = gameData.durationMinutes * 60;
 
   document.getElementById("setup-container").style.display = "none";
   document.getElementById("quiz-container").style.display = "block";
@@ -59,14 +91,13 @@ function updateTimerDisplay() {
     `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-// Vraag laden met foutafhandeling
+// Vraag laden
 async function loadQuestion() {
   if (isLoading || gameData.gameEnded) return;
   isLoading = true;
 
   try {
     if (gameData.questionCount >= gameData.maxQuestions) {
-      console.log("Max aantal vragen bereikt.");
       endQuiz("✅ Alle vragen zijn beantwoord!");
       return;
     }
@@ -77,7 +108,6 @@ async function loadQuestion() {
       randomId = Math.floor(Math.random() * gameData.maxQuestions) + 1;
       tries++;
       if (tries > gameData.maxQuestions) {
-        console.error("Geen nieuwe vragen meer beschikbaar.");
         endQuiz("✅ Alle vragen beantwoord!");
         return;
       }
@@ -86,14 +116,12 @@ async function loadQuestion() {
 
     const res = await fetch(`http://joost.assenbergh.nl:5291/api/quetion/GetById/${randomId}`);
     if (!res.ok) {
-      console.warn("Fout bij ophalen van vraag, probeer opnieuw...");
       setTimeout(loadQuestion, 1000);
       return;
     }
 
     const q = await res.json();
     if (!q || !q.questionText) {
-      console.warn("Lege vraag ontvangen, opnieuw proberen...");
       setTimeout(loadQuestion, 1000);
       return;
     }
@@ -102,7 +130,6 @@ async function loadQuestion() {
     gameData.currentQuestionId = q.id;
     gameData.questionCount++;
 
-    // Vraag tonen
     document.getElementById("quiz-question").textContent = sanitizedQuestion;
     const answerContainer = document.getElementById("answer-options");
     answerContainer.innerHTML = "";
@@ -121,28 +148,24 @@ async function loadQuestion() {
     });
 
   } catch (err) {
-    console.error("Fout bij ophalen van vraag:", err);
-    // Herstelpoging bij onverwachte fout
     setTimeout(loadQuestion, 2000);
   } finally {
     isLoading = false;
   }
 }
 
-// Antwoord checken met 3 seconden pauze
+// Antwoord checken
 async function checkAnswer(questionId, answerOption) {
+  if (gameData.gameEnded) return;
+
+  const buttons = document.querySelectorAll("#answer-options button");
+  buttons.forEach(btn => btn.disabled = true);
+
   try {
-    if (gameData.gameEnded) return;
-
-    // Alle antwoordknoppen tijdelijk uitschakelen
-    const buttons = document.querySelectorAll("#answer-options button");
-    buttons.forEach(btn => btn.disabled = true);
-
     const res = await fetch(`http://joost.assenbergh.nl:5291/api/quetion/CheckAnswer/${questionId}/${answerOption}`);
     if (!res.ok) throw new Error("Netwerkfout bij checkAnswer");
 
-    const text = await res.text();
-    const isCorrect = text.trim() === "true";
+    const isCorrect = (await res.text()).trim() === "true";
     const resultDiv = document.getElementById("result");
 
     if (isCorrect) {
@@ -155,7 +178,6 @@ async function checkAnswer(questionId, answerOption) {
       resultDiv.innerHTML = `<p class="text-danger fw-bold text-center">❌ Fout!</p>`;
     }
 
-    // Na 3 seconden volgende vraag laden
     setTimeout(() => {
       if (!gameData.gameEnded) {
         resultDiv.innerHTML = "";
@@ -164,13 +186,11 @@ async function checkAnswer(questionId, answerOption) {
     }, 3000);
 
   } catch (err) {
-    console.error("Fout bij checkAnswer:", err);
-    // Bij netwerkfout gewoon volgende vraag proberen
     setTimeout(loadQuestion, 2000);
   }
 }
 
-// Quiz stoppen (timer of home)
+// Quiz stoppen
 function endQuiz(customMsg = "🎉 Oefenen gestopt!") {
   if (gameData.gameEnded) return;
 
