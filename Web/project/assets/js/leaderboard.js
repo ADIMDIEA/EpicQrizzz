@@ -16,7 +16,7 @@ async function loadUser() {
     if (!res.ok) throw new Error("Netwerkfout");
     const user = await res.json();
 
-    const username = sessionStorage.getItem("epicqrizzz-username") || user.username || "gebruiker";
+    const username = sessionStorage.getItem("epicqrizzz-username") || user.name || "gebruiker";
     welcomeEl.textContent = `🙂 Hallo, ${username}!`;
 
   } catch (err) {
@@ -34,7 +34,7 @@ async function loadLeaderboard() {
     const users = await res.json();
 
     // Sorteer op munten (aflopend)
-    users.sort((a, b) => b.coins - a.coins);
+    users.sort((a, b) => b.munten - a.munten);
 
     // HTML tabel opbouwen
     leaderboardBody.innerHTML = "";
@@ -49,8 +49,8 @@ async function loadLeaderboard() {
 
       row.innerHTML = `
         <td><strong>${index + 1}</strong> ${rankIcon}</td>
-        <td>${user.username}</td>
-        <td><i class="bi bi-coin text-warning"></i> ${user.coins}</td>
+        <td>${user.name}</td>
+        <td><i class="bi bi-coin text-warning"></i> ${user.munten}</td>
       `;
       leaderboardBody.appendChild(row);
     });
